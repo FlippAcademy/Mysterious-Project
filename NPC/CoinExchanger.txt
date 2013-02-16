@@ -1,11 +1,11 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= Coin Exchanger
 //===== By: ==================================================
 //= Mysterious
 //===== Current Version: =====================================
 //= 1.9
 //===== Compatible With: =====================================
-//= rAthena SVN 
+//= Hercules, rAthena
 //===== Description: =========================================
 //= Exchange Coins (Mythril, Bronze, Gold, Platinum) into
 //= Zeny and vice versa

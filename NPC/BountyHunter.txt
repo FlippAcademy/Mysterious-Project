@@ -1,11 +1,11 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script =======================================
 //= Bounty Hunter
 //===== By: ==================================================
-//= Forgot who now.. =/ | Being revised by Mysterious
+//= ..., Mysterious
 //===== Current Version: =====================================
 //= 1.9
 //===== Compatible With: =====================================
-//= rAthena SVN 
+//= Hercules, rAthena
 //===== Description: =========================================
 //= Place a bounty on a Player while using a SQL Table
 //===== Other Information: ===================================

@@ -1,14 +1,14 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= Goblin Invasion
 //===== By: ==================================================
 //= Mysterious
 //===== Current Version: =====================================
 //= 1.7
 //===== Compatible With: =====================================
-//= rAthena SVN
+//= Hercules, rAthena
 //===== Description: =========================================
-// Goblins spawn randomly in a given town. Once all Goblins are killed
-// the Goblin Leader spawns.
+// Goblins spawn randomly in a given town. Once all Goblins are
+// killed, the Goblin Leader spawns.
 //===== TODO: ================================================
 // - Change more coding
 //===== Additional Comments: =================================

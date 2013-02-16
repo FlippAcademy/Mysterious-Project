@@ -1,11 +1,11 @@
-//===== rAthena Script ======================================= 
+//===== Mysterious Script ==================================== 
 //= OnDeath Script
 //===== By: ================================================== 
 //= Mysterious
 //===== Current Version: ===================================== 
 //= 1.2
-//===== Compatible With: ===================================== 
-//= rAthena SVN
+//===== Compatible With: =====================================
+//= Hercules, rAthena
 //===== Description: ========================================= 
 //= Basically, when a player dies, they will warp to the map you specify
 //= then there will be a countdown before they can go back to their saved spot.

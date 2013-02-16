@@ -1,13 +1,13 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= Complete Mall
 //===== By: ==================================================
 //= Mysterious
 //===== Current Version: =====================================
 //= 1.2
 //===== Compatible With: =====================================
-//= rAthena SVN 
+//= Hercules, rAthena
 //===== Description: =========================================
-//= Full complete mall
+//= Full complete mall (Typically for SHRs)
 //===== Additional Comments: =================================
 //= v1.0 - First release [Mysterious]
 //= v1.1 - Just fixed credits [Mysterious]

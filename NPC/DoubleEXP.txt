@@ -1,4 +1,4 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= Floating Rates
 //===== Support ==============================================
 //= Vist: https://rathena.svn.sourceforge.net/svnroot/rathena/trunk/doc/script_commands.txt
@@ -8,7 +8,7 @@
 //===== Current Version: =====================================
 //= 1.5
 //===== Compatible With: =====================================
-//= rAthena SVN
+//= Hercules, rAthena
 //===== Description: =========================================
 //= EXP Doubles on Weekends
 //===== Other Information: ===================================

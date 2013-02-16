@@ -1,13 +1,11 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= Weapon Forger
 //===== Template by: =========================================
-//= Pang Cake
-//===== Modified by: =========================================
-//= Mysterious
+//= Pang Cake, Mysterious
 //===== Current Version: =====================================
 //= 1.5
 //===== Compatible With: =====================================
-//= rAthena SVN 
+//= Hercules, rAthena
 //===== Description: =========================================
 //= This NPC forges NAMELESS weapons, and can incorporate element stones and star crumbs.
 //= The forge chance is adjustable by changing the formula below.

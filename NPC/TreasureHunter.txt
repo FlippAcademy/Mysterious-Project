@@ -1,13 +1,11 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= Treasure Hunter
 //===== By: ==================================================
-//= ARTHistic
-//===== Revised By: ==========================================
-//= Mysterious
+//= ARTHistic, Mysterious
 //===== Current Version: =====================================
 //= 1.2
 //===== Compatible With: =====================================
-//= rAthena SVN 
+//= Hercules, rAthena
 //===== Description: =========================================
 //= NPC summons a treasure box and players will have to find it
 //= and kill it.

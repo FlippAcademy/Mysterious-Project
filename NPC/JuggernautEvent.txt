@@ -1,4 +1,4 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= Juggernaut Event
 //===== Template By: =========================================
 //= Ace
@@ -7,10 +7,11 @@
 //===== Current Version: =====================================
 //= 1.6
 //===== Compatible With: =====================================
-//= rAthena SVN
+//= Hercules, rAthena
 //===== Description: =========================================
-//= A player will be selected to be the "Juggernaut" while the rest of the players
-//= have to all team together to take that Juggernaut down and be awarded.
+//= A player will be selected to be the "Juggernaut" while the 
+//= rest of the players have to all team together to take that
+//= Juggernaut down and be awarded.
 //===== TODO: ================================================
 // - Revise whole script
 //===== Additional Comments: =================================

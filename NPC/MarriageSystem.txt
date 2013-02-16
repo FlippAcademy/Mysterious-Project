@@ -1,11 +1,11 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= Marriage System
 //===== Revised By: ==========================================
 //= Mysterious
 //===== Current Version: =====================================
 //= 1.2
 //===== Compatible With: =====================================
-//= rAthena SVN 
+//= Hercules, rAthena
 //===== Description: =========================================
 //= Allows players to Marry and Divorce each other
 //===== Addtional Information: ===============================

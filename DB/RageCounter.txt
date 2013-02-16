@@ -1,13 +1,11 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= Rage Counter
 //===== Template By: =========================================
-//= JesusHong
-//===== Modified By: =========================================
-//= Mysterious
+//= JesusHong, Mysterious
 //===== Current Version: ===================================== 
 //= 1.1
-//===== Compatible With: ===================================== 
-//= eAthena or rAthena SVN 
+//===== Compatible With: =====================================
+//= Hercules, rAthena
 //===== Description: ========================================= 
 //= Upon each attack, there is a 5% chance to proc for 1 addition Blood Fervor counter.
 //= Each Blood Fervor counter increases your attack by 10%.

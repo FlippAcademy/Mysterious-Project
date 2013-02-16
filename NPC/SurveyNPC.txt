@@ -1,13 +1,11 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= Survey NPC
 //===== By: ==================================================
-//= Zafer
-//===== Modified By: =========================================
-// = Mysterious
+//= Zafer, Mysterious
 //===== Current Version: =====================================
 //= 1.6
 //===== Compatible With: =====================================
-//= rAthena SVN 
+//= Hercules, rAthena
 //===== Description: =========================================
 //= Allow players to vote on a question through a Survey.
 //===== Other Information: ===================================

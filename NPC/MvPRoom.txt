@@ -1,4 +1,4 @@
-//===== rAthena Script =======================================
+//===== Mysterious Script ====================================
 //= MvP Room
 //===== Template By: =========================================
 //= Soul
@@ -7,7 +7,7 @@
 //===== Current Version: =====================================
 //= 2.2
 //===== Compatible With: =====================================
-//= rAthena SVN 
+//= Hercules, rAthena
 //===== Description: =========================================
 //= A MvP Room with a Tool Dealer, Healer, and NPC that summons
 //= MvPs, Mini Bosses, and Dungeon Monsters
