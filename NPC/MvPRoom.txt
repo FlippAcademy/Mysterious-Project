@@ -1,0 +1,276 @@
+//===== rAthena Script =======================================
+//= MvP Room
+//===== Template By: =========================================
+//= Soul
+//===== Script Overhaul By: ==================================
+//= Mysterious
+//===== Current Version: =====================================
+//= 2.2
+//===== Compatible With: =====================================
+//= rAthena SVN 
+//===== Description: =========================================
+//= A MvP Room with a Tool Dealer, Healer, and NPC that summons
+//= MvPs, Mini Bosses, and Dungeon Monsters
+//===== TODO: ================================================
+// - Revise whole script
+//===== Additional Comments: =================================
+//= v1.0 - First release [Soul]
+//= v1.1 - Fixed Credits [Mysterious]
+//= v1.2 - Fixed Typos [Mysterious]
+//= v1.3 - Fixed Sentences [Mysterious]
+//= v1.4 - Friendly Messages [Mysterious]
+//= v1.5 - Removed useless spaces [Mysterious]
+//= v1.6 - Removed useless spaces (Again) [Mysterious]
+//= v1.7 - Fixed more sentences [Mysterious]
+//= v1.8 - Missed a typo [Mysterious]
+//= v1.9 - Organized the script a little more [Mysterious]
+//= v2.0 - Fixed and implemented proper duplicates [Mysterious]
+//= v2.1 - Fixed Credits [Mysterious]
+//= v2.2 - Fixed spacing between NPCs [Mysterious]
+//============================================================
+
+prontera,144,101,5	script  MvP Room	971,{
+	mes "[ MvP Room ]";
+	mes "Hello there!";
+	mes "Would you like to test out the MvP Room?";
+	next;
+	menu "- Yeah Sure!",M_Yes,"- No Thanks!",M_No;
+
+M_Yes:
+next;
+	mes "[ MvP Room ]";
+	mes "Very well. Which room would you like to go into?";
+	next;
+	menu "- Room 1",M_r1,"- Room 2",M_r2,"- Room 3",M_r3,"- Room 4",M_r4,"- Room 5",M_r5;
+
+M_r1:
+	warp "pvp_n_1-2",96,101;
+	close;
+
+M_r2:
+	warp "pvp_n_2-2",96,101;
+	close;
+
+M_r3:
+	warp "pvp_n_3-2",96,101;
+	close;
+
+M_r4:
+	warp "pvp_n_4-2",96,101;
+	close;
+
+M_r5:
+	warp "pvp_n_5-2",96,101;
+	close;
+
+M_No:
+next;
+	mes "[ MvP Room ]";
+	mes "Alright! Please come back when you think you're ready.";
+	close;
+}
+
+
+// ============= Healer (Duplicates bottom of script)
+pvp_n_2-2,98,106,5	script	Healer	914,{
+
+	mes "[ Healer ]";
+	mes "I have amazing healing powers!";
+	mes "You look like a person who needs them..";
+	mes "Want some?";
+	next;
+	menu "- Heal",-,"- No thanks",M_CANCEL;
+		percentheal 100,100;
+		mes "[ Healer ]";
+		mes "Wonderfull, You are now healed!.";
+		mes "Good luck!";
+		close;
+
+	M_CANCEL:
+	mes "[ Healer ]";
+	mes "Allright, come back if you need a heal.";
+	close;
+}
+
+//====== Monster vs Player ======
+pvp_n_1-2,96,106,5	script	MvP Master#1-2::MvP Master	766,{
+	
+	mes "[ MvP Master ]";
+	mes "How can I help you?";
+	next;
+	menu "- MvP",M_MvP,"- Mini Boss",M_Mini,"- Dungeon Monster",M_Dungeon,"- Quit",M_CANCEL;
+
+M_MvP:
+next;
+	mes "[ MvP Master ]";
+	mes "Choose your MvP:";
+	next;
+	menu
+
+	 //-------------MvP Monsters-----------
+	"- Amon Ra",  Amon,
+	"- Baphomet", Bapho,
+	"- Dark Lord",Dark,
+	"- Doppelg?nger",DG,
+	"- Dracula",Drac,
+	"- Drake",Drake,
+	"- Eddga",Eddga,
+	"- Evil Snake Lored",ESL,
+	"- Golden Thief Bug",GTB,
+	"- Garm",Garm,
+	"- Incarnation Samurai",Samu,
+	"- Stormy Knight",SK,
+	"- Lord of Death",LoD,
+	"- Maya",Maya,
+	"- Mistress",Missy,
+	"- Moonlight Flower",Moony,
+	"- Orc Hero",Hero,
+	"- Orc Lord",Lord,
+	"- Osiris",Osiris,
+	"- Pharaoh",Phara,
+	"- Phreeoni", Phree,
+	"- Tao Gunka",Tao,
+	"- Turtle General",TG,
+	"- Quit",mvp_CANCEL;
+
+	Amon:	monster "pvp_n_1-2.gat",117,99,"Amon Ra"		,1511,1;close;
+	Bapho:	monster "pvp_n_1-2.gat",117,99,"Baphomet"		,1039,1; close;
+	Dark:	monster "pvp_n_1-2.gat",117,99,"Dark Lord"		,1272,1; close;
+	DG:	monster "pvp_n_1-2.gat",117,99,"Doppelganger"		,1446,1;close;
+	Drac:	monster "pvp_n_1-2.gat",117,99,"Dracula"		,1389,1;close;
+	Drake:	monster "pvp_n_1-2.gat",117,99,"Drake"			,1112,1;close;
+	Eddga:	monster "pvp_n_1-2.gat",117,99,"Eddga"			,1115,1;close;
+	ESL:	monster "pvp_n_1-2.gat",117,99,"Evil Snake Lord"	,1418,1;close;
+	GTB:	monster "pvp_n_1-2.gat",117,99,"Golden Thief Bug"	,1086,1;close;
+	Garm:	monster "pvp_n_1-2.gat",117,99,"Garm"			,1252,1;close;
+	Samu:	monster "pvp_n_1-2.gat",117,99,"Incantation Samurai"	,1492,1;close;
+	SK:	monster "pvp_n_1-2.gat",117,99,"Stormy Knight"		,1251,1;close;
+	LoD:	monster "pvp_n_1-2.gat",117,99,"Lord of Death"		,1373,1;close;
+	Maya:	monster "pvp_n_1-2.gat",117,99,"Maya"			,1147,1;close;
+	Missy:	monster "pvp_n_1-2.gat",117,99,"Mistress"		,1059,1;close;
+	Moony:	monster "pvp_n_1-2.gat",117,99,"Moonlight Flower"	,1150,1;close;
+	Hero:	monster "pvp_n_1-2.gat",117,99,"Orc Hero"		,1087,1;close;
+	Lord:	monster "pvp_n_1-2.gat",117,99,"Orc Lord"		,1190,1;close;
+	Osiris:	monster "pvp_n_1-2.gat",117,99,"Osiris"			,1038,1;close;
+	Phara:	monster "pvp_n_1-2.gat",117,99,"Pharaoh"		,1157,1;close;
+	Phree:	monster "pvp_n_1-2.gat",117,99,"Phreeoni"		,1159,1;close;
+	Tao:	monster "pvp_n_1-2.gat",117,99,"Tao Gunka"		,1583,1;close;
+	TG:	monster "pvp_n_1-2.gat",117,99,"Turtle General"		,1312,1;close;
+
+
+// ===== Mini Boss =====
+
+M_Mini:
+next;
+	mes "[ MvP Master ]";
+	mes "Choose your Mini Boss:";
+	next;
+	menu 
+
+  //------------------Mini Bosses----------------------
+	"- Abysmal Knight",Abi,
+	"- Am Mut",Am,
+	"- Alice",Alice,
+	"- Angeling",Angel,
+	"- Arc Angeling",Arc,
+	"- Cat O' Nine Tail",Cato,
+	"- Chimera",Chim,
+	"- Creamy Fear",Fear,
+	"- Deviling",Devi,
+	"- Eclipse",Ecli,
+	"- Ghostring",GH,
+	"- Hydrolancer",Hydro,
+	"- Mastering",Master,
+	"- Maya Purple",MP,
+	"- Owl Baron",OB,
+	"- Owl Duke",OD,
+	"- Zealotus",Zea,
+	"- Quit",mvp_CANCEL;
+
+
+	Abi:	monster "pvp_n_1-2.gat",117,99,"Abysmal Knight"	,1219,1;close;
+	Am:	monster "pvp_n_1-2.gat",117,99,"Am Mut"		,1301,1;close;
+	Alice:	monster "pvp_n_1-2.gat",117,99,"Alice"		,1275,1;close;
+	Angel:	monster "pvp_n_1-2.gat",117,99,"Angeling"	,1096,1;close;
+	Arc:	monster "pvp_n_1-2.gat",117,99,"Arc Angeling"	,1388,1;close;
+	Cato:	monster "pvp_n_1-2.gat",117,99,"Cat O' Nine Tail"	,1307,1;close;
+	Chim:	monster "pvp_n_1-2.gat",117,99,"Chimera"	,1283,1;close;
+	Fear:	monster "pvp_n_1-2.gat",117,99,"Creamy Fear"	,1293,1;close;
+	Devi:	monster "pvp_n_1-2.gat",117,99,"Deviling"	,1582,1;close;
+	Ecli:	monster "pvp_n_1-2.gat",117,99,"Eclipse"	,1093,1;close;
+	GH:	monster "pvp_n_1-2.gat",117,99,"Ghostring"	,1120,1;close;
+	Hydro:	monster "pvp_n_1-2.gat",117,99,"Hydrolancer"	,1720,1;close;
+	Master:	monster "pvp_n_1-2.gat",117,99,"Mastering"	,1090,1;close;
+	MP:	monster "pvp_n_1-2.gat",117,99,"Maya Purple"	,1289,1;close;
+	OB:	monster "pvp_n_1-2.gat",117,99,"Owl Baron"	,1295,1;close;
+	OD:	monster "pvp_n_1-2.gat",117,99,"Owl Duke"	,1320,1;close;
+	Zea:	monster "pvp_n_1-2.gat",117,99,"Zealotus"	,1200,1;close;
+
+
+// ====== Dungeon Monsters =======
+M_Dungeon:
+next;
+	mes "[ MvP Master ]";
+	mes "Choose your Dungeon Monster:";
+	next;
+	menu 
+  
+  //------------------Dungeon Monsters----------------------
+	"- Bloody Knight",BK,
+	"- Dark Illusion",DI,
+	"- Mobster",MOB,
+	"- Gryphon",Gryph,
+	"- Harpy",Harp,
+	"- Garm Baby",GB,
+	"- Wicked Nymph",WN,
+	"- Mummy",Mum,
+	"- Skogul",Sko,
+	"- Rybio",Ryb,
+	"- Zombie Master",ZM,
+	"- Quit",mvp_CANCEL;
+
+BK:	monster "pvp_n_1-2.gat",117,99,"Bloody Knight"		,1268,1;close;
+DI:	monster "pvp_n_1-2.gat",117,99,"Dark Illusion"		,1302,1;close;
+MOB:	monster "pvp_n_1-2.gat",117,99,"Mobster"		,1313,1;close;
+Gryph:	monster "pvp_n_1-2.gat",117,99,"Gryphon"		,1259,1;close;
+Harp:	monster "pvp_n_1-2.gat",117,99,"Harpy"		,376,1;close;
+GB:	monster "pvp_n_1-2.gat",117,99,"Garm Baby"		,1515,1;close;
+WN:	monster "pvp_n_1-2.gat",117,99,"Wicked Nymph"		,1416,1;close;
+Mum:	monster "pvp_n_1-2.gat",117,99,"Mummy"		,1041,1;close;
+Sko:	monster "pvp_n_1-2.gat",117,99,"Skogul"		,1752,1;close;
+Ryb:	monster "pvp_n_1-2.gat",117,99,"Rybio"		,1201,1;close;
+ZM:	monster "pvp_n_1-2.gat",117,99,"Zombie Master"		,1298,1;close;
+//================================================================================
+
+	mvp_CANCEL:
+   next;
+		mes "[ MvP Master ]";
+		mes "Please come back when you know what to summon.";
+		close;
+
+	M_CANCEL:
+   next;
+		mes "[ MvP Master ]";
+		mes "Please come back whenever you feel like it!";
+		close;
+
+}
+
+//Duplicated MvP Masters
+pvp_n_2-2,96,106,5	duplicate(MvP Master)	MvP Master#2-2	766
+pvp_n_3-2,96,106,5	duplicate(MvP Master)	MvP Master#3-2	766
+pvp_n_4-2,96,106,5	duplicate(MvP Master)	MvP Master#4-2	766
+pvp_n_5-2,96,106,5	duplicate(MvP Master)	MvP Master#5-2	766
+
+//Duplicated Healers
+pvp_n_1-2,98,106,5  duplicate(Healer)	Healer#1	914
+pvp_n_3-2,98,106,5	duplicate(Healer)	Healer#2  914
+pvp_n_4-2,98,106,5	duplicate(Healer)	Healer#3	914
+pvp_n_5-2,98,106,5  duplicate(Healer)	Healer#4	914
+
+// Tool Dealers
+pvp_n_1-2,100,106,5	shop	Tool Dealer	83,501:-1,502:-1,503:-1,504:-1,506:-1,601:-1,602:-1,611:-1,610:-1,645:-1,656:-1
+pvp_n_2-2,100,106,5	shop	Tool Dealer	83,501:-1,502:-1,503:-1,504:-1,506:-1,601:-1,602:-1,611:-1,610:-1,645:-1,656:-1
+pvp_n_3-2,100,106,5	shop	Tool Dealer	83,501:-1,502:-1,503:-1,504:-1,506:-1,601:-1,602:-1,611:-1,610:-1,645:-1,656:-1
+pvp_n_4-2,100,106,5	shop	Tool Dealer	83,501:-1,502:-1,503:-1,504:-1,506:-1,601:-1,602:-1,611:-1,610:-1,645:-1,656:-1
+pvp_n_5-2,100,106,5	shop	Tool Dealer	83,501:-1,502:-1,503:-1,504:-1,506:-1,601:-1,602:-1,611:-1,610:-1,645:-1,656:-1

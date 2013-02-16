@@ -1,0 +1,47 @@
+//===== rAthena Script ======================================= 
+//= OnDeath Script
+//===== By: ================================================== 
+//= Mysterious
+//===== Current Version: ===================================== 
+//= 1.2
+//===== Compatible With: ===================================== 
+//= rAthena SVN
+//===== Description: ========================================= 
+//= Basically, when a player dies, they will warp to the map you specify
+//= then there will be a countdown before they can go back to their saved spot.
+//===== Additional Comments: =================================
+//= 1.0 - First release [Mysterious]
+//= 1.1 - Changed a few things [Mysterious]
+//= 1.2 - Changed a few more things [Mysterious]
+//============================================================
+xxx,xxx,xxx,xxx  script	xxx	xxx,{
+OnPCDieEvent:
+		warp "<yourmap>",xxx,xxx;
+		sleep2 1000;
+		announce "Hey "+strcharinfo(0)+", it seems you have died! Don't worry, you'll spawn in 13 Seconds!",bc_blue|bc_self;
+		sleep2 3000;
+		announce "10",bc_blue|bc_self;
+		sleep2 1000;
+		announce "9",bc_blue|bc_self;
+		sleep2 1000;
+		announce "8",bc_blue|bc_self;
+		sleep2 1000;
+		announce "7",bc_blue|bc_self;
+		sleep2 1000;
+		announce "6",bc_blue|bc_self;
+		sleep2 1000;
+		announce "5",bc_blue|bc_self;
+		sleep2 1000;
+		announce "4",bc_blue|bc_self;
+		sleep2 1000;
+		announce "3",bc_blue|bc_self;
+		sleep2 1000;
+		announce "2",bc_blue|bc_self;
+		sleep2 1000;
+		announce "1",bc_blue|bc_self;
+		sleep2 1000;
+		announce "Respawning..",bc_blue|bc_self;
+		atcommand "@alive "+strcharinfo(0);
+		sleep2 1000;
+		atcommand "@load "+strcharinfo(0);
+}

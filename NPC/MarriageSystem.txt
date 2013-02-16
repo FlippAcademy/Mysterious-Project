@@ -1,0 +1,92 @@
+//===== rAthena Script =======================================
+//= Marriage System
+//===== Revised By: ==========================================
+//= Mysterious
+//===== Current Version: =====================================
+//= 1.2
+//===== Compatible With: =====================================
+//= rAthena SVN 
+//===== Description: =========================================
+//= Allows players to Marry and Divorce each other
+//===== Addtional Information: ===============================
+//= Players can't constantly Marry and Divorce
+//===== Additional Comments: =================================
+//= v1.0 - First release
+//= v1.1 - Just fixed credits [Mysterious]
+//= v1.2 - Little bit more information [Mysterious]
+//===== TODO: ================================================
+// Revise more
+//============================================================
+prontera,202,170,4	script	Marriage System	916,{
+
+if((gettimetick(0)-timetick)<100000&&!getgmlevel()){
+	mes "You can't use me right now. Please wait";
+	close;
+	}
+	
+set .@n$,"[ Marriage System ]";
+
+
+	mes .@n$;
+	mes "Hi there! What can I do for you?";
+	menu "- I want to Marry",OnMarriage,"- I want to Divorce",OnDivorce;
+
+OnMarriage:
+	next;
+	mes .@n$;
+	mes "You have to join a party with your partner.";
+	mes "Then you have to pay me 10,000,000m.";
+	next;
+	mes .@n$;
+	mes "Do you want to proceed?";
+	if(select("- Yes","- No")==2){close;}
+	if(Zeny<10000000){
+		mes "You don't have enough zeny.";
+		close;
+	}
+	getpartymember getcharid(1),0;
+	if(getarraysize($@partymembername$)!=2){
+		next;
+		mes .@n$;
+		mes "Sorry.. you have to have only your partner in your party.";
+		close;
+	}
+	setarray .@matename$[0],$@partymembername$[0],$@partymembername$[1];
+	next;
+	mes .@n$;
+	mes "Who is the Husband or Wife?";
+	if(select("[ "+.@matename$[0]+" ]","[ "+.@matename$[1]+" ]","End")==3){close;}
+	atcommand "@marry "+.@matename$[(@menu==1?0:1)]+","+.@matename$[(@menu==1?1:0)];
+	set .@ADI,getcharid(3);
+	set .@AID,getcharid(3,(strcharinfo(0)==.@matename$[0]?.@matename$[1]:.@matename$[0]));
+	announce "[Congratulations]: "+.@matename$[(@menu==1?0:1)]+" and "+.@matename$[(@menu==1?1:0)]+" got married!",bc_all;
+	set timetick,gettimetick(0);
+	changebase 22;
+	atcommand "@nuke "+.@matename$[0]+"";
+	atcommand "@nuke "+.@matename$[1]+"";
+	set Zeny,Zeny-10000000;
+	attachrid (.@AID);
+	changebase 4021;
+	changebase 22;
+	set timetick,gettimetick(0);
+	attachrid (.@ADI);
+	close;
+
+OnDivorce:
+	next;
+	mes .@n$;
+	mes "Are you sure you would like to divorce?";
+	if(select("- No","- Yes")==1){close;}
+	next;
+	mes .@n$;
+	mes "If you would like to divorce, you would need to pay me 10,000,000m zeny.";
+	if(select("- No","- Yes")==1){close;}
+	if(Zeny<10000000){
+		mes "Sorry, but you don't have enough Zeny.";
+		close;
+	}
+	set Zeny,Zeny-10000000;
+	atcommand "@divorce "+strcharinfo(0);
+	close;
+
+}

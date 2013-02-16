@@ -1,0 +1,111 @@
+//===== rAthena Script =======================================
+//= Goblin Invasion
+//===== By: ==================================================
+//= Mysterious
+//===== Current Version: =====================================
+//= 1.7
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: =========================================
+// Goblins spawn randomly in a given town. Once all Goblins are killed
+// the Goblin Leader spawns.
+//===== TODO: ================================================
+// - Change more coding
+//===== Additional Comments: =================================
+//= v1.0 - First release [Mysterious]
+//= v1.1 - Fixed Bugs [Mysterious]
+//= v1.2 - Fixed Sentence structures [Mysterious]
+//= v1.3 - Added Proper Notes [Mysterious]
+//= v1.4 - Made it obvious on what players have to change [Mysterious]
+//= v1.5 - Proper Sentence Structures and Typos fixed [Mysterious]
+//= v1.6 - Fixed mobs not counting down properly [Mysterious]
+//= v1.7 - Maybe fixed some outstanding issues people had? [Mysterious]
+//============================================================
+
+xxx,xxx,xxx,xxx	script	Goblin Invasion  459,{
+
+set .gm,40;//GM Level to access the GM Menu. Default: 40
+
+	// GM menu | Game Masters Level 40 or more are allowed to Start and Stop invasions.
+	if (getgmlevel()>.gm) {
+		if (.mobs_left) {
+			mes "[Invasion]";
+			mes "An invasion is already in progress! Details:";
+			mes "Location: " + .Map$;
+			mes "^FF0000"+.mobs_left+"^000000 Goblins left";
+			mes " ";
+			mes "Would you like to Stop the invasion?";
+			if(select("- No:- Yes")==1) close;
+			announce "The Invasion has been stopped by "+strcharinfo(0),bc_all;
+			goto OnStop;
+		}
+		mes "[Invasion]";
+		mes "Please customize the Invasion event before starting it.";
+		mes "Note - The Goblin Leader drops x5 of the prize.";
+		Main:
+		next;
+		mes "[Invasion]";
+			switch(select("Item [" + getitemname(.ItemID) + "]:Start Event")) {
+		case 1:
+			mes "Which item would you like the Goblin Leader to drop?";
+			mes "Please input the item ID:";
+			input .ItemID;
+			goto Main;
+		case 2:
+			mes "The event is going to begin shortly.";
+			close2;
+			goto OnStart;
+	}
+
+	//If a player clicks the NPC, the NPC will tell the player how much Mobs are left on the certain map.
+	mes "[Invasion]";
+	mes "There are "+.mobs_left+" Goblins who've invaded "+.Map$[.rand_map]+"!";
+	close;
+	
+			/////////////////////////
+			//The actual NPC Script//
+			/////////////////////////
+OnMinute50: // Change this to your liking (When you want the event to start)
+OnStart:
+	set .mobs_left, 0;
+	sleep2 1000;
+	set $@ran, rand(1,6);
+	if ($@ran == 6) set .Map$,"splendide";
+	if ($@ran == 5) set .Map$,"izlude";
+	if ($@ran == 4) set .Map$,"payon";
+	if ($@ran == 3) set .Map$,"geffen";
+	if ($@ran == 2) set .Map$,"morocc";
+	if ($@ran == 1) set .Map$,"prontera";
+	sleep2 1000;
+	announce "[ Rune-Midgard Guard ]: We have trouble here in the fabulous town known as " + .Map$ + "!", bc_all;
+	sleep2 5000;
+	announce "[ Rune-Midgard Guard ]: Everyone, we need your help to get rid of these Goblins!", bc_all;
+	monster .Map$,0,0,"Goblin",1258,250,"Goblin Invasion::OnMyMobDead";
+	set .mobs_left, 250;
+	end;
+ 
+OnStop://When the event is stopped by a GM, or all monsters dead.
+	killmonster .Map$,"Goblin Invasion::OnMyMobDead";
+	killmonster .Map$,"Goblin Invasion::OnSpecialMobDead";
+	announce "It seems that "+strcharinfo(0)+" has ended the Invasion!",bc_all;
+	end;
+
+OnMyMobDead: //When a Goblin is killed
+	set .mobs_left,.mobs_left - 1;
+	if (.mobs_left==0) {
+		announce "[ Rune-Midgard Guard ]: The Goblin Leader has spawned in " + .Map$ + "!", bc_all;
+		monster .Map$,0,0,"Goblin Leader",1299,1,"Goblin Invasion::OnSpecialMobDead";
+
+	} else {
+		announce "["+.mobs_left+"/250] Goblins left.",bc_map;
+	}
+	end;
+
+OnSpecialMobDead:
+		announce strcharinfo(0)+" has fought off the Goblin Invasion and has been awarded a worthy prize!", bc_all;
+		getitem .ItemID,5; //Change the [5] to the amount you wish to hand out.
+		donpcevent "Goblin Invasion::OnStop";
+	}
+	end;
+
+}

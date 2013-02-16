@@ -1,0 +1,7838 @@
+//===== rAthena Script =======================================
+//= Capture the Flag
+//===== Template By: =========================================
+//= Ace
+//===== Revised By: ==========================================
+//= Mysterious
+//===== Current Version: =====================================
+//= 1.7
+//===== Compatible With: =====================================
+//= rAthena SVN 
+//===== Description: =========================================
+//= Capture the Flag event
+//===== TODO: ================================================
+// - Revise whole script
+//===== Additional Comments: =================================
+//= v1.0 - First release [Ace]
+//= v1.1 - Just fixed credits [Mysterious]
+//= v1.2 - Removed a lot of comments and replaced with /* *\ 's [Mysterious]
+//= v1.3 - Fixed Setences [Mysterious]
+//= v1.4 - Fixed alignments [Mysterious]
+//= v1.5 - Fixed Typos and Sentences [Mysterious]
+//= v1.6 - Sorta combined all "Settings" into one category  (More easy to read) [Mysterious]
+//= v1.7 - Fixed duplicate NPCs and missing end brackets [Mysterious]
+//============================================================
+
+// ==== Mapflags ==== \\
+prt_are01	mapflag	pvp
+prt_are01	mapflag	nomemo
+prt_are01	mapflag	noreturn
+prt_are01	mapflag	restricted	5
+pvp_2vs2	mapflag	gvg
+pvp_2vs2	mapflag	nomemo
+pvp_2vs2	mapflag	noreturn
+pvp_2vs2	mapflag	restricted	5
+tha_t10	mapflag	pvp
+tha_t10	mapflag	nomemo
+tha_t10	mapflag	noreturn
+tha_t10	mapflag	restricted	5
+poring_w02	mapflag	gvg
+poring_w02	mapflag	nomemo
+poring_w02	mapflag	noreturn
+poring_w02	mapflag	restricted	5
+pvp_y_7-1	mapflag	pvp
+pvp_y_7-1	mapflag	nomemo
+pvp_y_7-1	mapflag	noreturn
+pvp_y_7-1	mapflag	restricted	5
+
+prontera,161,193,6	script	Capture The Flag::CTF	108,{
+
+M_begin:
+
+// ==== Configuration Settings ==== \\
+set @team, 0;
+set @heal, 0;
+set charhp, Hp;
+set charsp, Sp;
+
+// What's the dyes the players are wearing?
+set hair, getlook(6);
+set body, getlook(7);
+
+// How many players are currently on the map?
+set @mapuser, getmapusers ("prt_are01");
+set @hmapuser, getmapusers ("pvp_2vs2");
+set @smapuser, getmapusers ("pvp_y_5-2");
+set @nmapuser, getmapusers ("tha_t10");
+set @gmapuser, getmapusers ("poring_w02");
+set @nnmapuser, getmapusers ("pvp_y_7-1");
+
+getmapxy(originmap$,originx,originy,0,strcharinfo(0));
+
+set @blueteam$, "^0066FFBlue Team^000000";
+set @redteam$, "^FF0000Red Team^000000";
+// ==== End Configuration Settings ==== \\
+
+mes "[Capture The Flag]";
+mes "Please select your desired gametype:";
+
+menu "Classic CTF "+@mapuser+"/24",M_ctfclassic,"Classic GvG CTF "+@gmapuser+"/24",M_classicgvg,"Hardcore CTF "+@hmapuser+"/24",M_ctfhardcore,"Single Flag CTF "+@smapuser+"/24",M_ctfsingle,"Neutral Flag CTF "+@nmapuser+"/24",M_ctfneutral,"Prontera Neutral Flag "+@nnmapuser+"/24",M_pronteraneutral,"Your Stats",M_pstats,"Player Ranks",M_rank,"Rules",M_rules,"Cancel",-;
+
+mes "Please come back when you feel like it!";
+close;
+
+M_ctfclassic:
+next;
+mes "[ Classic CTF ]";
+if ($@redwin == 1 || $@bluewin == 1)
+  {
+    mes "";
+    mes "Please wait a minute while I clean the battlefield.";
+    close2;
+    sleep2 45000;
+    set $@redwin, 0;
+    set $@bluewin, 0;
+    end;
+  }
+
+// If the map is full, no more players are allowed in.
+if (@mapuser >= 24)
+  {
+    goto fullmsgclassic;
+  }
+
+if ($@redqt < 0)
+{
+set $@redqt, 0;
+}
+
+if ($@blueqt < 0)
+{
+set $@blueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@redqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@blueqt+"/12 Players.";
+mes " ";
+mes "Please choose a team:";
+
+menu "Blue Team",M_bt,"Red Team",M_rt,"Cancel",-;
+close;
+
+M_bt:
+if ($@blueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "prt_are01", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto okclassic;
+end;
+
+M_rt:
+if ($@redqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "prt_are01", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto okclassic;
+end;
+
+okclassic:
+
+set @iclassqt, getarraysize($@classic);
+setarray $@classic[@iclassqt], getcharid(3);
+
+set colorchange, 1;
+set @playing, 1;
+set @classic, 1;
+
+if (@team == 2)
+{
+set $@redqt, $@redqt +1;
+
+// ======= Red Team ====== \\
+*/ Remove this and on line 311 if you want to enable
+// Changes the player's dyes, warps the player, and saves the player to CTF map
+if (Sex == 1)
+  {
+  if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+		{
+  	setlook 6,6;
+		setlook 7,2;
+  	}
+
+	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+  	{
+		setlook 6,6;
+  	setlook 7,1;
+  	}
+
+	if (Class == SuperNovice || Class == Job_Paladin)
+  	{
+		setlook 6,6;
+  	setlook 7,58;
+		}
+
+	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+  	{
+  	setlook 6,6;
+  	setlook 7,146;
+  	}
+
+  if (Class == Job_High_Priest || Class == Job_Champion)
+		{
+		setlook 6,6;
+		setlook 7,66;
+  	}
+
+  if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+  	{
+  	setlook 6,6;
+		setlook 7,42;
+  	}
+
+  if (Class == Job_Creator)
+		{
+  	setlook 6,6;
+  	setlook 7,14;
+		}
+
+	if (Class == Job_Sage)
+		{
+		setlook 6,6;
+		setlook 7,18;
+  	}
+
+	if (Class == Job_Professor || Class == Job_Mage)
+		{
+  	setlook 6,6;
+		setlook 7,39;
+		}
+
+	if (Class == Job_Whitesmith)
+  	{
+  	setlook 6,6;
+		setlook 7,62;
+		}
+
+	if (Class == Job_Soul_Linker)
+		{
+		setlook 6,6;
+		setlook 7,122;
+		}
+
+	if (Class == Job_Gunslinger)
+		{
+		setlook 6,6;
+		setlook 7,26;
+		}
+	}
+
+if (Sex == 0)
+	{
+	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+		{
+		setlook 6,6;
+		setlook 7,2;
+		}
+
+	if (Class == Job_Crusader || Class == Job_Merchant)
+		{
+		setlook 6,6;
+		setlook 7,18;
+		}
+
+	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+  	{
+		setlook 6,6;
+		setlook 7,42;
+		}
+
+	if (Class == Job_High_Priest)
+		{
+		setlook 6,6;
+		setlook 7,0;
+		}
+
+  if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+		{
+  	setlook 6,6;
+  	setlook 7,14;
+  	}
+
+	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+		{
+		setlook 6,6;
+  	setlook 7,66;
+  	}
+
+	if (Class == Job_Paladin || Class == Job_Blacksmith)
+		{
+		setlook 6,6;
+		setlook 7,58;
+  	}
+  if (Class == Job_Dancer)
+  	{
+  	setlook 6,6;
+  	setlook 7,153;
+  	}
+
+	if (Class == Job_Gypsy)
+  	{
+  	setlook 6,6;
+		setlook 7,47;
+  	}
+
+  if (Class == Job_Stalker)
+		{
+  	setlook 6,6;
+  	setlook 7,157;
+  	}
+
+  if (Class == Job_Archer)
+  	{
+		setlook 6,6;
+		setlook 7,26;
+		}
+
+  if (Class == Job_Gunslinger)
+  	{
+  	setlook 6,6;
+  	setlook 7,26;
+  	}
+  }
+/*
+save "prt_are01",268,150;
+warp "prt_are01",268,150;
+}
+
+if (@team == 1)
+{
+set $@blueqt, $@blueqt +1;
+
+// ======= Blue Team ====== \\
+*/ Remove this and on line 369 if you want to enable
+// Changes the player's dyes, warps the player, and saves the player to CTF map
+if (Sex == 1)
+  {
+	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+		{
+  	setlook 6,5;
+  	setlook 7,1;
+		}
+
+  if (Class == Job_Merchant || Class == Job_Swordsman)
+  	{
+  	setlook 6,5;
+		setlook 7,2;
+		}
+
+	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+  	{
+  	setlook 6,5;
+  	setlook 7,43;
+		}
+  }
+
+if (Sex == 0)
+	{
+	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+		{
+		setlook 6,5;
+  	setlook 7,1;
+		}
+
+  if (Class == Job_Archer)
+  	{
+  	setlook 6,5;
+  	setlook 7,0;
+  	}
+
+	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+  	{
+  	setlook 6,5;
+		setlook 7,43;
+  	}
+  if (Class == Job_Wizard)
+		{
+  	setlook 6,5;
+		setlook 7,67;
+		}
+	}
+/*
+
+save "prt_are01",30,150;
+warp "prt_are01",30,150;
+}
+percentheal 100,100;
+close;
+
+fullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@redqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@blueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+end;
+
+M_ctfhardcore:
+next;
+mes "[Hardcore CTF]";
+
+if ($@hredwin == 1 || $@hbluewin == 1)
+{
+mes "";
+mes "Please wait a minute till I clean the battlefield.";
+close2;
+sleep2 45000;
+set $@hredwin, 0;
+set $@hbluewin, 0;
+end;
+}
+
+// If the map is full, no more players are allowed in.
+if (@hmapuser >= 24)
+  {
+    goto hfullmsgclassic;
+  }
+
+if ($@hredqt < 0)
+{
+  set $@hredqt, 0;
+}
+
+if ($@hblueqt < 0)
+{
+  set $@hblueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@hredqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@hblueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",M_hbt,"Red Team",M_hrt,"Cancel",-;
+close;
+
+M_hbt:
+if ($@hblueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "pvp_2vs2", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto okhardcore;
+end;
+
+M_hrt:
+if ($@hredqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "pvp_2vs2", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto okhardcore;
+end;
+
+okhardcore:
+
+set @ihardqt, getarraysize($@hardcore);
+setarray $@hardcore[@ihardqt], getcharid(3);
+
+set colorchange, 1;
+set @playing, 1;
+set @hardcore, 1;
+
+if (@team == 2)
+{
+set $@rspawn, $@rspawn + 1;
+set $@hredqt, $@hredqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+	if ($@rspawn == 1)
+	{
+	set @rspawn, 1;
+	save "pvp_2vs2",65,47;
+	warp "pvp_2vs2",65,47;
+	}
+
+	if ($@rspawn == 2)
+	{
+	set @rspawn, 2;
+	set $@rspawn, 0;
+	save "pvp_2vs2",65,33;
+	warp "pvp_2vs2",65,33;
+	}
+}
+
+if (@team == 1)
+{
+set $@bspawn, $@bspawn + 1;
+set $@hblueqt, $@hblueqt +1;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+	if ($@bspawn == 1)
+	{
+	set @bspawn, 1;
+	save "pvp_2vs2",14,47;
+	warp "pvp_2vs2",14,47;
+	}
+
+	if ($@bspawn == 2)
+	{
+	set @bspawn, 2;
+	set $@bspawn, 0;
+	save "pvp_2vs2",14,33;
+	warp "pvp_2vs2",14,33;
+	}
+}
+percentheal 100,100;
+close;
+
+hfullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@hredqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@hblueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+
+close;
+
+M_ctfsingle:
+next;
+mes "[Single Flag CTF]";
+
+if ($@sredwin == 1 || $@sbluewin == 1)
+{
+mes "";
+mes "Please wait a minute till I clean the battlefield.";
+close2;
+sleep2 45000;
+set $@sredwin, 0;
+set $@sbluewin, 0;
+end;
+}
+
+// If room is full, don't allow anymore players.
+if (@smapuser >= 24)
+  {
+    goto sfullmsgclassic;
+  }
+
+if ($@sredqt < 0)
+{
+  set $@sredqt, 0;
+}
+
+if ($@sblueqt < 0)
+{
+  set $@sblueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@sredqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@sblueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",sbt,"Red Team",srt,"Cancel",-;
+close;
+
+sbt:
+if ($@sblueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "pvp_y_5-2", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto oksingle;
+end;
+
+srt:
+if ($@sredqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "pvp_y_5-2", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto oksingle;
+end;
+
+oksingle:
+
+set @isingleqt, getarraysize($@single);
+setarray $@single[@isingleqt], getcharid(3);
+
+if (@smapuser == 0)
+{
+set $@boff, 1;
+set $@roff, 0;
+set $@suddendeath, 0;
+setnpctimer 0;
+}
+
+set colorchange, 1;
+set @playing, 1;
+set @single, 1;
+
+if (@team == 2)
+{
+set $@single_rspawn, $@single_rspawn + 1;
+set $@sredqt, $@sredqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+	if ($@single_rspawn == 1)
+	{
+	set @single_rspawn, 1;
+	save "pvp_y_5-2",205,122;
+	warp "pvp_y_5-2",205,122;
+	}
+
+	if ($@single_rspawn == 2)
+	{
+	set @single_rspawn, 2;
+	set $@single_rspawn, 0;
+	save "pvp_y_5-2",205,137;
+	warp "pvp_y_5-2",205,137;
+	}
+}
+
+if (@team == 1)
+{
+set $@single_bspawn, $@single_bspawn + 1;
+set $@sblueqt, $@sblueqt +1;
+setlook 6,5;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+	if ($@single_bspawn == 1)
+	{
+	set @single_bspawn, 1;
+	save "pvp_y_5-2",58,137;
+	warp "pvp_y_5-2",58,137;
+	}
+
+	if ($@single_bspawn == 2)
+	{
+	set @single_bspawn, 2;
+	set $@single_bspawn, 0;
+	save "pvp_y_5-2",58,122;
+	warp "pvp_y_5-2",58,122;
+	}
+}
+percentheal 100,100;
+close;
+
+OnRoundStart:
+
+OnInit:
+startnpctimer;
+set $@nearend, 0;
+set $@suddendeath, 0;
+set $@roundover, 0;
+end;
+
+OnSuddenDeath:
+if ($@suddendeath == 1)
+	{
+	mapannounce "pvp_y_5-2", "Sudden Death!!",0;
+	setnpctimer 174000;
+	stopnpctimer;
+	}
+
+if (($@suddendeath == 0) && ($@nearend == 1))
+	{
+	setnpctimer 174000;
+	startnpctimer;
+	}
+end;
+
+OnTimer4000:
+if ($@roff == 1)
+	{
+	set $@roundover, 0;
+	mapannounce "pvp_y_5-2", "The Red Team is on Offense.",0;
+	}
+
+if ($@boff == 1)
+	{
+	set $@roundover, 0;
+	mapannounce "pvp_y_5-2", "The Blue Team is on Offense.",0;
+	}
+end;
+
+OnTimer60000:
+mapannounce "pvp_y_5-2", "2 minutes remaining!",0;
+end;
+
+OnTimer120000:
+mapannounce "pvp_y_5-2", "1 minute remaining!",0;
+end;
+
+OnTimer173000:
+set $@nearend, 1;
+end;
+
+OnTimer174000:
+if ($@suddendeath == 1)
+	{
+	goto OnSuddenDeath;
+	}
+end;
+
+OnTimer175000:
+mapannounce "pvp_y_5-2", "5",0;
+if ($@suddendeath == 1)
+	{
+	goto OnSuddenDeath;
+	}
+end;
+
+OnTimer176000:
+mapannounce "pvp_y_5-2", "4",0;
+if ($@suddendeath == 1)
+	{
+	goto OnSuddenDeath;
+	}
+end;
+
+OnTimer177000:
+mapannounce "pvp_y_5-2", "3",0;
+if ($@suddendeath == 1)
+	{
+	goto OnSuddenDeath;
+	}
+end;
+
+OnTimer178000:
+mapannounce "pvp_y_5-2", "2",0;
+if ($@suddendeath == 1)
+	{
+	goto OnSuddenDeath;
+	}
+end;
+
+OnTimer179000:
+mapannounce "pvp_y_5-2", "1",0;
+if ($@suddendeath == 1)
+	{
+	goto OnSuddenDeath;
+	}
+end;
+
+OnTimer180000:
+if ($@suddendeath == 1)
+	{
+	goto OnSuddenDeath;
+	end;
+	}
+
+mapannounce "pvp_y_5-2", "Round Over!!",0;
+if ($@suddendeath != 1)
+	{
+	goto OnEventRoundOver;
+	}
+end;
+
+OnEventRoundOver:
+maprespawnguildid "pvp_y_5-2",0,7;
+movenpc "single_blue_flag",53,130;
+movenpc "single_red_flag",210,130;
+set $@sredcarrier$, "-";
+set $@sbluecarrier$, "-";
+set $@rresett, 1;
+set $@bresett, 1;
+set $@sbluedropped, 0;
+set $@sbluegone, 0;
+set $@sredgone, 0;
+set $@sreddropped, 0;
+set $@roundover, 0;
+setnpctimer 0;
+stopnpctimer;
+
+if ($@roff == 1)
+	{
+	set $@roff, 0;
+	set $@boff, 1;
+	goto OnRoundStart;
+	}
+
+if ($@boff == 1)
+	{
+	set $@roff, 1;
+	set $@boff, 0;
+	goto OnRoundStart;
+	}
+
+end;
+
+sfullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@sredqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@sblueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+end;
+
+M_ctfneutral:
+
+next;
+mes "[Neutral Flag CTF]";
+
+if ($@nredwin == 1 || $@nbluewin == 1)
+{
+mes "";
+mes "Please wait a minute while I clean the battlefield.";
+close2;
+
+sleep2 45000;
+
+set $@nredwin, 0;
+set $@nbluewin, 0;
+end;
+}
+
+//makes player unable to join the game due to full room
+if (@nmapuser >= 24)
+{
+goto nfullmsgclassic;
+}
+
+if ($@nredqt < 0)
+{
+set $@nredqt, 0;
+}
+
+if ($@nblueqt < 0)
+{
+set $@nblueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@nredqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@nblueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",nbt,"Red Team",nrt,"Cancel",-;
+close;
+
+nbt:
+if ($@nblueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "tha_t10", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto okneutral;
+end;
+
+nrt:
+if ($@nredqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "tha_t10", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto okneutral;
+end;
+
+okneutral:
+
+set @ineutralqt, getarraysize($@neutral);
+setarray $@neutral[@ineutralqt], getcharid(3);
+
+set colorchange, 1;
+set @playing, 1;
+set @neutral, 1;
+
+if (@team == 2)
+{
+set $@nredqt, $@nredqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+save "tha_t10",90,156;
+warp "tha_t10",90,156;
+}
+
+if (@team == 1)
+{
+set $@nblueqt, $@nblueqt +1;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+save "tha_t10",167,100;
+warp "tha_t10",167,100;
+}
+percentheal 100,100;
+close;
+
+nfullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@nredqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@nblueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+end;
+
+M_classicgvg:
+
+next;
+mes "[Classic GvG CTF]";
+
+//makes player unable to join the game due to full room
+if (@gmapuser >= 24)
+{
+goto hfullmsgclassic;
+}
+
+if ($@gredqt < 0)
+{
+set $@gredqt, 0;
+}
+
+if ($@gblueqt < 0)
+{
+set $@gblueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@gredqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@gblueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",gbt,"Red Team",grt,"Cancel",-;
+close;
+
+gbt:
+if ($@gblueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "poring_w02", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto okclassicgvg;
+end;
+
+grt:
+if ($@gredqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "poring_w02", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto okclassicgvg;
+end;
+
+okclassicgvg:
+
+set @iclassgvgqt, getarraysize($@classicgvg);
+setarray $@classicgvg[@iclassgvgqt], getcharid(3);
+
+set colorchange, 1;
+set @playing, 1;
+set @classicgvg, 1;
+
+if (@team == 2)
+{
+set $@gredqt, $@gredqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+save "poring_w02",170,176;
+warp "poring_w02",170,176;
+}
+
+if (@team == 1)
+{
+set $@gblueqt, $@gblueqt +1;
+setlook 6,5;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+save "poring_w02",26,176;
+warp "poring_w02",26,176;
+}
+percentheal 100,100;
+close;
+
+gfullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@gredqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@gblueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+
+close;
+
+M_pronteraneutral:
+
+next;
+mes "[Prontera Neutral Flag]";
+
+//makes player unable to join the game due to full room
+if (@nnmapuser >= 24)
+{
+goto nnfullmsgclassic;
+}
+
+if ($@nnredqt < 0)
+{
+set $@nnredqt, 0;
+}
+
+if ($@nnblueqt < 0)
+{
+set $@nnblueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@nnredqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@nnblueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",nnbt,"Red Team",nnrt,"Cancel",-;
+close;
+
+nnbt:
+if ($@nnblueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "pvp_y_7-1", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto okpronteraneutral;
+end;
+
+nnrt:
+if ($@nnredqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto M_begin;
+	}
+
+mapannounce "pvp_y_7-1", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto okpronteraneutral;
+end;
+
+okpronteraneutral:
+
+set @ipneutralqt, getarraysize($@pneutral);
+setarray $@pneutral[@ipneutralqt], getcharid(3);
+
+set colorchange, 1;
+set @playing, 1;
+
+if (@team == 2)
+{
+set $@nnredqt, $@nnredqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+save "pvp_y_7-1",283,204;
+warp "pvp_y_7-1",283,204;
+}
+
+if (@team == 1)
+{
+set $@nnblueqt, $@nnblueqt +1;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+save "pvp_y_7-1",29,204;
+warp "pvp_y_7-1",29,204;
+}
+percentheal 100,100;
+close;
+
+nnfullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@nnredqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@nnblueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+end;
+
+M_rules:
+mes "What do you want to know about?";
+menu "Common Rules",crrules,"Classic CTF",crules,"Hardcore CTF",hrules,"Single Flag CTF",srules,"Back",M_begin;
+close;
+
+crrules:
+
+next;
+mes "The object of Capture the Flag is to steal the opposing team's flag and returning it to your base while having your flag still at your base.";
+mes "Each gametype plays in a similar way.  The flags will cast agility down on the flag carrier every 5 seconds and will also follow the carriers like pets would (when they have the flag).  Each game of Capture the Flag will end with the first team that achieves 5 flag captures.";
+next;
+menu "Common Rules",crrules,"Classic CTF",crules,"Hardcore CTF",hrules,"Single Flag CTF",srules,"Back",M_begin;
+close;
+
+crules:
+next;
+mes "Classic CTF is the most basic of Capture the Flag games.  PvP is on and each team must play offense and defense to win.  The flags are both on touch return.";
+menu "Common Rules",crrules,"Classic CTF",crules,"Hardcore CTF",hrules,"Single Flag CTF",srules,"Back",M_begin;
+close;
+
+hrules:
+next;
+mes "Hardcore CTF is similar to Classic CTF but with some minor tweaks.  GvG is on, each team has to play offensively and defensively, and the flag will silence the flag carrier along with agility down every 5 seconds.  The flags are both on touch return.";
+menu "Common Rules",crrules,"Classic CTF",crules,"Hardcore CTF",hrules,"Single Flag CTF",srules,"Back",M_begin;
+close;
+
+srules:
+next;
+mes "Single Flag CTF is the most complicated out of the three gametypes.  PvP is on for this gametype.  Instead of having to play offense and defense all at once there are 3 minute rounds where one team is on offense and the other is on defense.  The flags are NOT on touch return in this gametype, instead they are on 30 second respawn times.";
+menu "Common Rules",crrules,"Classic CTF",crules,"Hardcore CTF",hrules,"Single Flag CTF",srules,"Back",M_begin;
+close;
+
+M_pstats:
+set #kdr, #kills - #death;
+set @kdr, kills - death;
+set #rate, ( ((#win * 25) - (#lose *25)) + ((#kills * 4) - (#death *4)) + (#spree * 10)  + (#multikill * 30) + (#fcapt * 5) + (#ftaken - #fdrop) + (#freturn * 3) );
+set rate, ( ((win * 25) - (lose *25)) + ((kills * 4) - (death * 4)) + (spree * 10) + (multikill * 30) + (fcapt * 5) + (ftaken - fdrop) + (freturn * 3) );
+
+next;
+mes "Wins: "+win+"";
+mes "Loses: "+lose+"";
+mes " ";
+mes "Kills: "+kills+"";
+mes "Deaths: "+death+"";
+mes "Kill/Death Ratio: "+@kdr+"";
+mes " ";
+mes "Best Killing Spree: "+spree+"";
+mes "Best Multi Kill: "+multikill+"";
+mes " ";
+mes "Flags Captured: "+fcapt+"";
+mes "Flags Returned: "+freturn+"";
+mes "Flags Taken: "+ftaken+"";
+mes "Flags Dropped: "+fdrop+"" ;
+mes " ";
+//mes "Rank: n/a";
+mes "Overall Rating: "+rate+"";
+mes "CTF POINTS: "+ctfpt+"";
+mes " ";
+mes "TOTAL CTF POINTS GAINED: "+tctfpt+"";
+
+close;
+end;
+
+astat:
+
+next;
+mes "Wins: "+#win+"";
+mes "Loses: "+#lose+"";
+mes " ";
+mes "Kills: "+#kills+"";
+mes "Deaths: "+#death+"";
+mes "Kill/Death Ratio: "+#kdr+"";
+mes " ";
+mes "Best Killing Spree: "+#spree+"";
+mes "Best Multi Kill: "+#multikill+"";
+mes " ";
+mes "Flags Captured: "+#fcapt+"";
+mes "Flags Returned: "+#freturn+"";
+mes "Flags Taken: "+#ftaken+"";
+mes "Flags Dropped: "+#fdrop+"" ;
+mes " ";
+//mes "Rank: n/a";
+mes "Overall Rating: "+#rate+"";
+
+close;
+end;
+
+M_rank:
+mes "System isn't implemented yet.";
+close;
+
+//Player kill, death, and log in/outs
+
+OnPCKillEvent:
+
+getmapxy(@checkmap$,@checkx,@checky,0);
+if (@checkmap$ == "prt_are01" || @checkmap$ == "pvp_2vs2" || @checkmap$ == "pvp_y_5-2" || @checkmap$ == "tha_t10" || @checkmap$ == "poring_w02" || @checkmap$ == "pvp_y_7-1")
+	{
+	set kills, kills + 1;
+	set #kills, #kills + 1;
+
+	set ctfpt, ctfpt + 1;
+	set tctfpt, tctfpt + 1;
+
+	set spreecounter, spreecounter + 1;
+
+	if (spreecounter > #spree)
+		{
+		set #spree, spreecounter;
+		}
+
+	if (spreecounter > spree)
+		{
+		set spree, spreecounter;
+		}
+
+	if (@killtimer == 0)
+		{
+		set @killtime, gettimetick(2);
+		set @kill, kills;
+		set @killtimer, 1;
+		end;
+		}
+
+	if ((@killtime) + 10) > (gettimetick(2))
+		{
+		if ((kills > @kill) && (@killtimer == 1))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got a DOUBLE KILL!!",bc_map;
+			set @killtimer, 2;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 2)
+				{
+				set multikill, 2;
+				set #multikill, 2;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 2))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got a TRIPLE KILL!!",bc_map;
+			set @killtimer, 3;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 3)
+				{
+				set multikill, 3;
+				set #multikill, 3;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 3))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got a MULTI KILL!!",bc_map;
+			set @killtimer, 4;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 4)
+				{
+				set multikill, 4;
+				set #multikill, 4;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 4))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got a CRAZY KILL!!",bc_map;
+			set @killtimer, 5;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 5)
+				{
+				set multikill, 5;
+				set #multikill, 5;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 5))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got an MEGA KILL!!",bc_map;
+			set @killtimer, 6;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 6)
+				{
+				set multikill, 6;
+				set #multikill, 6;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 6))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got an ULTRA KILL!!",bc_map;
+			set @killtimer, 7;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 7)
+				{
+				set multikill, 7;
+				set #multikill, 7;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 7))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got an UBER KILL!!",bc_map;
+			set @killtimer, 8;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 8)
+				{
+				set multikill, 8;
+				set #multikill, 8;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 8))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got a ZOMGZ KILL!!",bc_map;
+			set @killtimer, 9;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 9)
+				{
+				set multikill, 9;
+				set #multikill, 9;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 9))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got a RIDICULOUS KILL!!",bc_map;
+			set @killtimer, 10;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 10)
+				{
+				set multikill, 10;
+				set #multikill, 10;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 10))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got a MONSTER KILL!!",bc_map;
+			set @killtimer, 11;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 11)
+				{
+				set multikill, 11;
+				set #multikill, 11;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 11))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got an INSANE KILL!!",bc_map;
+			set @killtimer, 12;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 12)
+				{
+				set multikill, 12;
+				set #multikill, 12;
+				}
+			end;
+			}
+
+		if ((kills > @kill) && (@killtimer == 12))
+			{
+			set @kill, kills;
+			announce ""+strcharinfo(0)+" got a GM KILL!!",bc_map;
+			set @killtimer, 1;
+			set @killtime, gettimetick(2);
+
+			if (multikill < 13)
+				{
+				set multikill, 13;
+				set #multikill, 13;
+				}
+			end;
+			}
+		end;
+		}
+
+	if ((@killtime) + 10) < (gettimetick(2))
+		{
+		set @killtime, gettimetick(2);
+		set @kill, kills;
+		set @killtimer, 1;
+		}
+
+	}
+end;
+
+OnPCDieEvent:
+
+getmapxy(@checkmap$,@checkx,@checky,0);
+if (@checkmap$ == "prt_are01")
+{
+set spreecounter, 0;
+set @heal, 0;
+set #death, #death + 1;
+set death, death + 1;
+
+	if ($@redcarrier$ == strcharinfo(0))
+	{
+	set $@reddropped, 1;
+	mapannounce "prt_are01", ""+$@redcarrier$+" dropped the Red Flag.",0;
+	set $@redcarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+	if ($@bluecarrier$ == strcharinfo(0))
+	{
+	set $@bluedropped, 1;
+	mapannounce "prt_are01", ""+$@bluecarrier$+" dropped the Blue Flag.",0;
+	set $@bluecarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+if (@team == 1)
+{
+sleep2 1000;
+set @newsave, rand(1,5);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(29,34);
+		set @savey, rand(134,166);
+		warp "prt_are01", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(37,78);
+		set @savey, rand(125,130);
+		warp "prt_are01", (@savex), (@savey);
+		}
+
+	if (@newsave == 3)
+		{
+		set @savex, rand(38,77);
+		set @savey, rand(169,174);
+		warp "prt_are01", (@savex), (@savey);
+		}
+
+	if (@newsave == 4)
+		{
+		set @savex, rand(81,84);
+		set @savey, rand(134,165);
+		warp "prt_are01", (@savex), (@savey);
+		}
+
+	if (@newsave == 5)
+		{
+		set @savex, rand(43,83);
+		set @savey, rand(146,153);
+		warp "prt_are01", (@savex), (@savey);
+		}
+}
+
+if (@team == 2)
+{
+sleep2 1000;
+set @newsave, rand(1,5);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(265,270);
+		set @savey, rand(134,166);
+		warp "prt_are01", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(222,260);
+		set @savey, rand(125,130);
+		warp "prt_are01", (@savex), (@savey);
+		}
+
+	if (@newsave == 3)
+		{
+		set @savex, rand(215,218);
+		set @savey, rand(133,168);
+		warp "prt_are01", (@savex), (@savey);
+		}
+
+	if (@newsave == 4)
+		{
+		set @savex, rand(221,261);
+		set @savey, rand(169,174);
+		warp "prt_are01", (@savex), (@savey);
+		}
+
+	if (@newsave == 5)
+		{
+		set @savex, rand(215,256);
+		set @savey, rand(146,153);
+		warp "prt_are01", (@savex), (@savey);
+		}
+}
+
+atcommand "@alive";
+sleep2 500;
+percentheal 100,100;
+}
+
+if (@checkmap$ == "pvp_2vs2")
+{
+set spreecounter, 0;
+set @heal, 0;
+set #death, #death + 1;
+set death, death + 1;
+
+	if ($@hredcarrier$ == strcharinfo(0))
+	{
+	set $@hreddropped, 1;
+	mapannounce "pvp_2vs2", ""+$@hredcarrier$+" dropped the Red Flag.",0;
+	set $@hredcarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+	if ($@hbluecarrier$ == strcharinfo(0))
+	{
+	set $@hbluedropped, 1;
+	mapannounce "pvp_2vs2", ""+$@hbluecarrier$+" dropped the Blue Flag.",0;
+	set $@hbluecarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+if (@team == 1)
+{
+sleep2 1000;
+set @newsave, rand(1,2);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(14,17);
+		set @savey, rand(14,49);
+		warp "pvp_2vs2", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(14,17);
+		set @savey, rand(52,65);
+		warp "pvp_2vs2", (@savex), (@savey);
+		}
+}
+
+if (@team == 2)
+{
+sleep2 1000;
+set @newsave, rand(1,2);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(62,65);
+		set @savey, rand(30,65);
+		warp "pvp_2vs2", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(62,65);
+		set @savey, rand(14,27);
+		warp "pvp_2vs2", (@savex), (@savey);
+		}
+}
+
+atcommand "@alive";
+sleep2 500;
+percentheal 100,100;
+}
+
+if (@checkmap$ == "pvp_y_5-2")
+{
+set spreecounter, 0;
+set @heal, 0;
+set #death, #death + 1;
+set death, death + 1;
+
+if (@team == 1)
+{
+sleep2 1000;
+set @newsave, rand(1,2);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(46,60);
+		set @savey, rand(128,138);
+		warp "pvp_y_5-2", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(54,62);
+		set @savey, rand(120,127);
+		warp "pvp_y_5-2", (@savex), (@savey);
+		}
+}
+
+if (@team == 2)
+{
+sleep2 1000;
+set @newsave, rand(1,2);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(205,220);
+		set @savey, rand(121,124);
+		warp "pvp_y_5-2", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(201,211);
+		set @savey, rand(125,137);
+		warp "pvp_y_5-2", (@savex), (@savey);
+		}
+}
+
+atcommand "@alive";
+
+	if ($@sredcarrier$ == strcharinfo(0))
+		{
+		mapannounce "pvp_y_5-2", ""+$@sredcarrier$+" dropped the Red Flag.",0;
+		set $@sredcarrier$, "-";
+		set $@sreddropped, 1;
+		set $@suddendeath, 0;
+		set $@rresett, 0;
+		set #fdrop, #fdrop + 1;
+		set fdrop, fdrop + 1;
+		sleep2 500;
+		percentheal 100,100;
+
+			if ($@nearend == 1)
+			{
+			goto OnSuddenDeath;
+			}
+
+			if ($@nearend == 0)
+			{
+
+			OnRRespawn:
+			set $@ridol, $@ridol + 1;
+
+			if ($@rresett == 1)
+				{
+				set $@ridol, 0;
+				goto flgrspwn;
+				end;
+				}
+
+			if ($@ridol == 15)
+				{
+				movenpc "single_red_flag",210,130;
+				set $@rresett, 0;
+				set $@ridol, 0;
+				set $@sredgone, 0;
+				set $@sreddropped, 0;
+				set $@suddendeath, 0;
+				announce "The Red Flag has been returned.",bc_map;
+				end;
+				}
+
+			sleep2 1000;
+			goto OnRRespawn;
+			end;
+			}
+		}
+
+	if ($@sbluecarrier$ == strcharinfo(0))
+		{
+		mapannounce "pvp_y_5-2", ""+$@sbluecarrier$+" dropped the Blue Flag.",0;
+		set $@sbluecarrier$, "-";
+		set $@sbluedropped, 1;
+		set $@suddendeath, 0;
+		set $@bresett, 0;
+		set #fdrop, #fdrop + 1;
+		set fdrop, fdrop + 1;
+		sleep2 500;
+		percentheal 100,100;
+
+			if ($@nearend == 1)
+			{
+			goto OnSuddenDeath;
+			}
+
+			if ($@nearend == 0)
+			{
+
+			OnBRespawn:
+			set $@bidol, $@bidol + 1;
+
+			if ($@bresett == 1)
+				{
+				set $@bidol, 0;
+				goto flgrspwn;
+				end;
+				}
+
+			if ($@bidol == 15)
+				{
+				movenpc "single_blue_flag",53,130;
+				set $@bresett, 0;
+				set $@bidol, 0;
+				set $@sbluegone, 0;
+				set $@sbluedropped, 0;
+				set $@suddendeath, 0;
+				announce "The Blue Flag has been returned.",bc_map;
+				end;
+				}
+
+			sleep2 1000;
+			goto OnBRespawn;
+			end;
+			}
+flgrspwn:
+end;
+		}
+sleep2 500;
+percentheal 100,100;
+}
+
+if (@checkmap$ == "tha_t10")
+{
+set spreecounter, 0;
+set @heal, 0;
+set #death, #death + 1;
+set death, death + 1;
+
+if (@team == 1)
+{
+sleep2 1000;
+set @newsave, rand(1,2);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(134,157);
+		set @savey, rand(90,101);
+		warp "tha_t10", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(148,167);
+		set @savey, rand(99,105);
+		warp "tha_t10", (@savex), (@savey);
+		}
+}
+
+if (@team == 2)
+	{
+	sleep2 1000;
+	set @savex, rand(94,120);
+	set @savey, rand(144,167);
+	warp "tha_t10", (@savex), (@savey);
+	}
+
+atcommand "@alive";
+
+	if ($@flagcarrier$ == strcharinfo(0))
+		{
+		mapannounce "tha_t10", ""+$@flagcarrier$+" dropped the Flag.",0;
+		set $@flagcarrier$, "-";
+		set $@flagdropped, 1;
+		set $@flagresett, 0;
+		set #fdrop, #fdrop + 1;
+		set fdrop, fdrop + 1;
+		sleep2 500;
+		percentheal 100,100;
+
+		OnFlagRespawn:
+		set $@idol, $@idol + 1;
+
+		if ($@flagresett == 1)
+			{
+			set $@idol, 0;
+			goto nflgrspwn;
+			end;
+			}
+
+		if ($@idol == 30)
+			{
+			movenpc "neutral_flag",127,124;
+			set $@idol, 0;
+			set $@flaggone, 0;
+			set $@flagdropped, 0;
+			announce "The Flag has been returned.",bc_map;
+			end;
+			}
+
+		sleep2 1000;
+		goto OnFlagRespawn;
+		end;
+		}
+sleep2 500;
+percentheal 100,100;
+}
+nflgrspwn:
+
+if (@checkmap$ == "poring_w02")
+{
+set spreecounter, 0;
+set @heal, 0;
+set #death, #death + 1;
+set death, death + 1;
+
+
+if (@team == 2)
+{
+sleep2 1000;
+warp "poring_w02",170,176;
+}
+
+if (@team == 1)
+{
+sleep2 1000;
+warp "poring_w02",26,176;
+}
+
+
+	if ($@gredcarrier$ == strcharinfo(0))
+	{
+	set $@greddropped, 1;
+	mapannounce "poring_w02", ""+$@gredcarrier$+" dropped the Red Flag.",0;
+	set $@gredcarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+	if ($@gbluecarrier$ == strcharinfo(0))
+	{
+	set $@gbluedropped, 1;
+	mapannounce "poring_w02", ""+$@gbluecarrier$+" dropped the Blue Flag.",0;
+	set $@gbluecarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+atcommand "@alive";
+sleep2 500;
+percentheal 100,100;
+}
+
+if (@checkmap$ == "pvp_y_7-1")
+{
+set spreecounter, 0;
+set @heal, 0;
+set #death, #death + 1;
+set death, death + 1;
+
+
+if (@team == 1)
+{
+sleep2 1000;
+set @savex, rand(27,67);
+set @savey, rand(196,209);
+warp "pvp_y_7-1", (@savex), (@savey);
+}
+
+
+if (@team == 2)
+{
+sleep2 1000;
+set @savex, rand(244,284);
+set @savey, rand(196,209);
+warp "pvp_y_7-1", (@savex), (@savey);
+}
+
+atcommand "@alive";
+
+	if ($@nflagcarrier$ == strcharinfo(0))
+		{
+		mapannounce "pvp_y_7-1", ""+$@nflagcarrier$+" dropped the Flag.",0;
+		set $@warp, 0;
+		set $@nflagcarrier$, "-";
+		set $@nflagdropped, 1;
+		set $@nflagresett, 0;
+		set #fdrop, #fdrop + 1;
+		set fdrop, fdrop + 1;
+		sleep2 500;
+		percentheal 100,100;
+
+		OnNFlagRespawn:
+		set $@nidol, $@nidol + 1;
+
+		if ($@nflagresett == 1)
+			{
+			set $@nidol, 0;
+			goto nnflgrspwn;
+			end;
+			}
+
+		if ($@nidol == 30)
+			{
+			movenpc "prontera_neutral_flag",156,195;
+			set $@nidol, 0;
+			set $@nflaggone, 0;
+			set $@nflagdropped, 0;
+			announce "The Flag has been returned.",bc_map;
+			end;
+			}
+
+		sleep2 1000;
+		goto OnNFlagRespawn;
+		end;
+		}
+
+sleep2 500;
+percentheal 100,100;
+}
+nnflgrspwn:
+end;
+
+//When player logs out it restores thier hair color, body color, and save point
+
+OnPCLogoutEvent:
+
+getmapxy(@checkmap$,@checkx,@checky,0);
+if (@checkmap$ == "prt_are01")
+{
+mapannounce "prt_are01", ""+strcharinfo(0)+" has left the game.",0;
+set @cmapuser, getmapusers ("prt_are01");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @classic, 0;
+
+if (@cmapuser == 1)
+	{
+	movenpc "blue_flag", 47, 150;
+	movenpc "red_flag",252,150;
+	set $@bluept, 0;
+	set $@redpt, 0;
+	set $@reddropped, 0;
+	set $@redgone, 0;
+	set $@bluedropped, 0;
+	set $@bluegone, 0;
+	set $@bluecarrier$, "-";
+	set $@redcarrier$, "-";
+	}
+
+if ($@redcarrier$ == strcharinfo(0))
+	{
+	set $@reddropped, 1;
+	mapannounce "prt_are01", ""+$@redcarrier$+" dropped the Red Flag.",0;
+	set $@redcarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+if ($@bluecarrier$ == strcharinfo(0))
+	{
+	set $@bluedropped, 1;
+	mapannounce "prt_are01", ""+$@bluecarrier$+" dropped the Blue Flag.",0;
+	set $@bluecarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+//lowers the team count for leaving the game
+
+if (@team == 2)
+	{
+	set $@redqt, $@redqt - 1;
+	}
+
+	if (@team == 1)
+	{
+	set $@blueqt, $@blueqt - 1;
+	}
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@classic); set @i, @i+1) {
+	if ($@classic[@i] == getcharid(3))
+		{
+		setarray $@classic[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@classic); set @i, @i+1) {
+	setarray $@classic[@i], $@classic[@i+1];
+}
+
+}
+
+if (@checkmap$ == "pvp_2vs2")
+{
+mapannounce "pvp_2vs2", ""+strcharinfo(0)+" has left the game.",0;
+set @hmapuser, getmapusers ("pvp_2vs2");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @hardcore, 0;
+
+if ($@hredcarrier$ == strcharinfo(0))
+	{
+	set $@hreddropped, 1;
+	mapannounce "pvp_2vs2", ""+$@hredcarrier$+" dropped the Red Flag.",0;
+	set $@hredcarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+if ($@hbluecarrier$ == strcharinfo(0))
+	{
+	set $@hbluedropped, 1;
+	mapannounce "pvp_2vs2", ""+$@hbluecarrier$+" dropped the Blue Flag.",0;
+	set $@hbluecarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+//lowers the team count for leaving the game
+
+	if (@team == 2)
+	{
+	set $@hredqt, $@hredqt - 1;
+	}
+
+	if (@team == 1)
+	{
+	set $@hblueqt, $@hblueqt - 1;
+	}
+
+if (@hmapuser == 1)
+	{
+	movenpc "hard_blue_flag", 19, 39;
+	movenpc "hard_red_flag",60,39;
+	set $@hbluept, 0;
+	set $@hredpt, 0;
+	set $@hbluecarrier$, "-";
+	set $@hredcarrier$, "-";
+	set $@hreddropped, 0;
+	set $@hredgone, 0;
+	set $@hbluedropped, 0;
+	set $@hbluegone, 0;
+	}
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@hardcore); set @i, @i+1) {
+	if ($@hardcore[@i] == getcharid(3))
+		{
+		setarray $@hardcore[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@hardcore); set @i, @i+1) {
+	setarray $@hardcore[@i], $@hardcore[@i+1];
+}
+
+}
+
+if (@checkmap$ == "pvp_y_5-2")
+{
+mapannounce "pvp_y_5-2", ""+strcharinfo(0)+" has left the game.",0;
+set @smapuser, getmapusers ("pvp_y_5-2");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @single, 0;
+
+if (@smapuser == 1)
+	{
+	movenpc "single_blue_flag",53,130;
+	movenpc "single_red_flag",210,130;
+	set $@sbluept, 0;
+	set $@sredpt, 0;
+	set $@sbluecarrier$, "-";
+	set $@sredcarrier$, "-";
+	set $@sreddropped, 0;
+	set $@sredgone, 0;
+	set $@sbluedropped, 0;
+	set $@sbluegone, 0;
+	}
+
+warp originmap$, (originx), (originy);
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@single); set @i, @i+1) {
+	if ($@single[@i] == getcharid(3))
+		{
+		setarray $@single[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@single); set @i, @i+1) {
+	setarray $@single[@i], $@single[@i+1];
+}
+
+if ($@sredcarrier$ == strcharinfo(0))
+	{
+	set $@sreddropped, 1;
+	mapannounce "pvp_y_5-2", ""+$@sredcarrier$+" dropped the Red Flag.",0;
+	set $@sredcarrier$, "-";
+	set $@suddendeath, 0;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	set $@rresett, 0;
+
+	if ($@nearend == 1)
+		{
+		goto OnSuddenDeath;
+		}
+	if ($@nearend == 0)
+		{
+		goto OnRRespawn;
+		}
+	}
+
+if ($@sbluecarrier$ == strcharinfo(0))
+	{
+	set $@sbluedropped, 1;
+	mapannounce "pvp_y_5-2", ""+$@sbluecarrier$+" dropped the Blue Flag.",0;
+	set $@sbluecarrier$, "-";
+	set $@suddendeath, 0;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	set $@bresett, 0;
+
+	if ($@nearend == 1)
+		{
+		goto OnSuddenDeath;
+		}
+	if ($@nearend == 0)
+		{
+		goto OnBRespawn;
+		}
+	}
+
+//lowers the team count for leaving the game
+
+if (@team == 2)
+	{
+	set $@sredqt, $@sredqt - 1;
+	}
+
+	if (@team == 1)
+	{
+	set $@sblueqt, $@sblueqt - 1;
+	}
+
+}
+
+if (@checkmap$ == "tha_t10")
+{
+mapannounce "tha_t10", ""+strcharinfo(0)+" has left the game.",0;
+set @nmapuser, getmapusers ("tha_t10");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @neutral, 0;
+
+if (@nmapuser == 1)
+	{
+	movenpc "neutral_flag",127,124;
+	set $@nbluept, 0;
+	set $@nredpt, 0;
+	set $@flagcarrier$, "-";
+	set $@flagresett, 0;
+	set $@flaggone, 0;
+	set $@flagdropped, 0;
+	}
+
+warp originmap$, (originx), (originy);
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@neutral); set @i, @i+1) {
+	if ($@neutral[@i] == getcharid(3))
+		{
+		setarray $@neutral[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@neutral); set @i, @i+1) {
+	setarray $@neutral[@i], $@neutral[@i+1];
+}
+
+if ($@flagcarrier$ == strcharinfo(0))
+	{
+	set $@flagdropped, 1;
+	mapannounce "tha_t10", ""+$@flagcarrier$+" dropped the Flag.",0;
+	set $@flagcarrier$, "-";
+	set $@flagresett, 0;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	goto OnFlagRespawn;
+	}
+
+//lowers the team count for leaving the game
+
+if (@team == 2)
+	{
+	set $@nredqt, $@nredqt - 1;
+	}
+
+if (@team == 1)
+	{
+	set $@nblueqt, $@nblueqt - 1;
+	}
+
+}
+
+if (@checkmap$ == "poring_w02")
+{
+mapannounce "poring_w02", ""+strcharinfo(0)+" has left the game.",0;
+set @gmapuser, getmapusers ("poring_w02");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @classicgvg, 0;
+
+if ($@gredcarrier$ == strcharinfo(0))
+	{
+	set $@greddropped, 1;
+	mapannounce "poring_w02", ""+$@gredcarrier$+" dropped the Red Flag.",0;
+	set $@gredcarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+if ($@gbluecarrier$ == strcharinfo(0))
+	{
+	set $@gbluedropped, 1;
+	mapannounce "poring_w02", ""+$@gbluecarrier$+" dropped the Blue Flag.",0;
+	set $@gbluecarrier$, "-";
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+//lowers the team count for leaving the game
+
+	if (@team == 2)
+	{
+	set $@gredqt, $@gredqt - 1;
+	}
+
+	if (@team == 1)
+	{
+	set $@gblueqt, $@gblueqt - 1;
+	}
+
+if (@gmapuser == 1)
+	{
+	//movenpc "classicgvg_blue_flag",98,124;
+	//movenpc "classicgvg_red_flag",98,41;
+	movenpc "classicgvg_red_flag",98,30;
+	movenpc "classicgvg_blue_flag",98,135;
+	set $@gbluept, 0;
+	set $@gredpt, 0;
+	set $@gbluecarrier$, "-";
+	set $@gredcarrier$, "-";
+	set $@greddropped, 0;
+	set $@gredgone, 0;
+	set $@gbluedropped, 0;
+	set $@gbluegone, 0;
+	}
+
+warp originmap$, (originx), (originy);
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@classicgvg); set @i, @i+1) {
+	if ($@classicgvg[@i] == getcharid(3))
+		{
+		setarray $@classicgvg[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@classicgvg); set @i, @i+1) {
+	setarray $@classicgvg[@i], $@classicgvg[@i+1];
+}
+
+}
+
+if (@checkmap$ == "pvp_y_7-1")
+{
+mapannounce "pvp_y_7-1", ""+strcharinfo(0)+" has left the game.",0;
+set @nnmapuser, getmapusers ("pvp_y_7-1");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @pneutral, 0;
+
+if (@nnmapuser == 1)
+	{
+	movenpc "prontera_neutral_flag",156,195;
+	set $@nnbluept, 0;
+	set $@nnredpt, 0;
+	set $@nflagcarrier$, "-";
+	set $@nflagresett, 0;
+	set $@nflaggone, 0;
+	set $@nflagdropped, 0;
+	}
+
+warp originmap$, (originx), (originy);
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@pneutral); set @i, @i+1) {
+	if ($@pneutral[@i] == getcharid(3))
+		{
+		setarray $@pneutral[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@pneutral); set @i, @i+1) {
+	setarray $@pneutral[@i], $@pneutral[@i+1];
+}
+
+if ($@nflagcarrier$ == strcharinfo(0))
+	{
+	set $@nflagdropped, 1;
+	mapannounce "pvp_y_7-1", ""+$@nflagcarrier$+" dropped the Flag.",0;
+	set $@nflagcarrier$, "-";
+	set $@nflagresett, 0;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	goto OnFlagRespawn;
+	}
+
+//lowers the team count for leaving the game
+
+if (@team == 2)
+	{
+	set $@nnredqt, $@nnredqt - 1;
+	}
+
+if (@team == 1)
+	{
+	set $@nnblueqt, $@nnblueqt - 1;
+	}
+
+}
+
+if (@playing == 1)
+	{
+	warp originmap$, (originx), (originy);
+	save originmap$, (originx), (originy);
+	set @team, 0;
+	set Hp, charhp;
+	set Sp, charsp;
+	set @playing, 0;
+	}
+end;
+
+OnPCLoginEvent:
+
+if (flogin == 0)
+	{
+	set charhp, 1;
+	set charsp, 1;
+	set @playing, 0;
+	set flogin, 1;
+	}
+
+getmapxy(@checkmap$,@checkx,@checky,0);
+if (@checkmap$ == "prt_are01" || @checkmap$ == "pvp_2vs2" || @checkmap$ == "pvp_y_5-2" || @checkmap$ == "tha_t10" || @checkmap$ == "poring_w02" || @checkmap$ == "pvp_y_7-1")
+	{
+	set @heal, 0;
+	warp originmap$, (originx), (originy);
+	save originmap$, (originx), (originy);
+		if (colorchange == 1)
+		{
+		set colorchange, 0;
+		setlook 6, hair;
+		setlook 7, body;
+		set Hp, charhp;
+		set Sp, charsp;
+		}
+	}
+
+if ((@checkmap$ == "prontera") && (colorchange == 1))
+	{
+	set colorchange, 0;
+	setlook 6, hair;
+	setlook 7, body;
+	}
+end;
+
+OnEventGameOverClassic:
+set .@classqt, getarraysize($@classic);
+set .@cctf, 0;
+
+over:
+if (.@cctf < .@classqt)
+{
+	{
+	attachrid $@classic[.@cctf];
+	if (@classic == 1)
+		{
+		if (@team == 2)
+			{
+
+			if ($@redwin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+
+			if ($@bluewin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+			}
+
+		if (@team == 1)
+			{
+
+			if ($@redwin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+
+			if ($@bluewin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+			}
+		}
+
+	save originmap$, (originx), (originy);
+	warp originmap$, (originx), (originy);
+	setlook 6, hair;
+	setlook 7, body;
+	set Hp, charhp;
+	set Sp, charsp;
+	set @playing, 0;
+	set @classic, 0;
+	set @heal, 0;
+	detachrid;
+	set .@cctf, .@cctf + 1;
+	goto over;
+	}
+}
+for (set .@i, 0; .@i < getarraysize($@classic); set .@i, .@i+1) {
+	setarray $@classic[.@i], 0;
+}
+end;
+
+OnEventGameOverHardcore:
+set .@hardqt, getarraysize($@hardcore);
+set .@hctf, 0;
+
+hover:
+if (.@hctf < .@hardqt)
+{
+	{
+	attachrid $@hardcore[.@hctf];
+	if (@hardcore == 1)
+		{
+		if (@team == 2)
+			{
+
+			if ($@hredwin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+
+			if ($@hbluewin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+			}
+
+		if (@team == 1)
+			{
+
+			if ($@hredwin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+
+			if ($@hbluewin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+			}
+		}
+
+	save originmap$, (originx), (originy);
+	warp originmap$, (originx), (originy);
+	setlook 6, hair;
+	setlook 7, body;
+	set Hp, charhp;
+	set Sp, charsp;
+	set @playing, 0;
+	set @hardcore, 0;
+	set @heal, 0;
+	detachrid;
+	set .@hctf, .@hctf + 1;
+	goto hover;
+	}
+}
+for (set .@h, 0; .@h < getarraysize($@hardcore); set .@h, .@h+1) {
+	setarray $@hardcore[.@h], 0;
+}
+end;
+
+OnEventGameOverSingle:
+set .@singleqt, getarraysize($@single);
+set .@sctf, 0;
+
+sover:
+if (.@sctf < .@singleqt)
+{
+	{
+	attachrid $@single[.@sctf];
+	if (@single == 1)
+		{
+		if (@team == 2)
+			{
+
+			if ($@sredwin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+
+			if ($@sbluewin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+			}
+
+		if (@team == 1)
+			{
+
+			if ($@sredwin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+
+			if ($@sbluewin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+			}
+		}
+
+	save originmap$, (originx), (originy);
+	warp originmap$, (originx), (originy);
+	setlook 6, hair;
+	setlook 7, body;
+	set Hp, charhp;
+	set Sp, charsp;
+	set @playing, 0;
+	set @single, 0;
+	set @heal, 0;
+	detachrid;
+	set .@sctf, .@sctf + 1;
+	goto sover;
+	}
+}
+for (set .@s, 0; .@s < getarraysize($@single); set .@s, .@s+1) {
+	setarray $@single[.@s], 0;
+}
+end;
+
+OnEventGameOverNeutral:
+set .@neutralqt, getarraysize($@neutral);
+set .@nctf, 0;
+
+nover:
+if (.@nctf < .@neutralqt)
+{
+	{
+	attachrid $@neutral[.@nctf];
+	if (@neutral == 1)
+		{
+		if (@team == 2)
+			{
+
+			if ($@nredwin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+
+			if ($@nbluewin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+			}
+
+		if (@team == 1)
+			{
+
+			if ($@nredwin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+
+			if ($@nbluewin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+			}
+		}
+
+	save originmap$, (originx), (originy);
+	warp originmap$, (originx), (originy);
+	setlook 6, hair;
+	setlook 7, body;
+	set Hp, charhp;
+	set Sp, charsp;
+	set @playing, 0;
+	set @neutral, 0;
+	set @heal, 0;
+	detachrid;
+	set .@nctf, .@nctf + 1;
+	goto nover;
+	}
+}
+for (set .@n, 0; .@n < getarraysize($@neutral); set .@n, .@n+1) {
+	setarray $@neutral[.@n], 0;
+}
+end;
+
+OnEventGameOverCgvg:
+set .@classicgvgqt, getarraysize($@classicgvg);
+set .@gctf, 0;
+
+gover:
+if (.@gctf < .@classicgvgqt)
+{
+	{
+	attachrid $@classicgvg[.@gctf];
+	if (@classicgvg == 1)
+		{
+		if (@team == 2)
+			{
+
+			if ($@gredwin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+
+			if ($@gbluewin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+			}
+
+		if (@team == 1)
+			{
+
+			if ($@gredwin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+
+			if ($@gbluewin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+			}
+		}
+
+	save originmap$, (originx), (originy);
+	warp originmap$, (originx), (originy);
+	setlook 6, hair;
+	setlook 7, body;
+	set Hp, charhp;
+	set Sp, charsp;
+	set @playing, 0;
+	set @classicgvg, 0;
+	set @heal, 0;
+	detachrid;
+	set .@gctf, .@gctf + 1;
+	goto gover;
+	}
+}
+for (set .@g, 0; .@g < getarraysize($@classicgvg); set .@g, .@g+1) {
+	setarray $@classicgvg[.@g], 0;
+}
+end;
+
+OnEventGameOverPneutral:
+set .@pneutralqt, getarraysize($@pneutral);
+set .@pctf, 0;
+
+pover:
+if (.@pctf < .@pneutralqt)
+{
+	{
+	attachrid $@pneutral[.@pctf];
+	if (@pneutral == 1)
+		{
+		if (@team == 2)
+			{
+
+			if ($@nnredwin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+
+			if ($@nnbluewin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+			}
+
+		if (@team == 1)
+			{
+
+			if ($@nnredwin == 1)
+				{
+				set #lose, #lose + 1;
+				set lose, lose + 1;
+				}
+
+			if ($@nnbluewin == 1)
+				{
+				set #win, #win + 1;
+				set win, win + 1;
+				}
+			}
+		}
+
+	save originmap$, (originx), (originy);
+	warp originmap$, (originx), (originy);
+	setlook 6, hair;
+	setlook 7, body;
+	set Hp, charhp;
+	set Sp, charsp;
+	set @playing, 0;
+	set @pneutral, 0;
+	set @heal, 0;
+	detachrid;
+	set .@pctf, .@pctf + 1;
+	goto pover;
+	}
+}
+for (set .@p, 0; .@p < getarraysize($@pneutral); set .@p, .@p+1) {
+	setarray $@pneutral[.@p], 0;
+}
+end;
+
+}
+
+prt_are01,252,150,2	script	Red Flag::red_flag	1026,{
+
+npcspeed 100;
+
+getmapxy($@redflag$,$@redflagx,$@redflagy,1);
+getmapxy($@redtouch$,$@redtouchx,$@redtouchy,0);
+
+if (distance($@redflagx,$@redflagy,$@redtouchx,$@redtouchy) <= 2)
+{
+
+If (@team == 1) 
+{
+	if ($@redgone == 0)
+	{ 
+	set $@redgone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@redcarrier$, strcharinfo(0);
+	announce ""+$@redcarrier$+" has the Red Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	specialeffect2 38;
+	goto redfollow;
+	} 
+
+ 	//Make the flag be picked up by the blue team
+	if ($@reddropped == 1)
+	{
+	set $@reddropped, 0;
+	set $@redgone, 1; 
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@redcarrier$, strcharinfo(0);
+	announce ""+$@redcarrier$+" has the Red Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	specialeffect2 38;
+	goto redfollow;
+	}
+
+	if (@novalue == 503)
+	{
+	redfollow:
+
+	if (strcharinfo(0) == $@redcarrier$)
+		{
+		getmapxy(@mapname$,@redcarrierx,@redcarriery,0,$@redcarrier$);
+		npcwalkto (@redcarrierx + 1), (@redcarriery - 1);
+
+		set @redagi, @redagi + 1;
+		set @redwarp, @redwarp + 1;
+
+		if (@redwarp == 30)
+			{
+			movenpc "red_flag", @redcarrierx, @redcarriery;
+			set @redwarp, 0;
+			}
+
+		if (@redagi == 5)
+			{
+			sc_start SC_DECREASEAGI,10000,10;
+			specialeffect2 38;
+			set @redagi, 0;
+			}
+		}
+
+	if (strcharinfo(0) != $@redcarrier$)
+		{
+		end;
+		}
+
+	sleep2 500;
+	goto redfollow;
+	}
+
+}
+
+If (@team == 2) 
+{
+	if (($@bluecarrier$ == strcharinfo(0)) && ($@reddropped == 0) && ($@redgone == 0))
+	{
+	movenpc "blue_flag", 47, 150;
+	set $@redpt, $@redpt + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team has "+$@bluept+" points.",bc_map;
+	announce "The Red Team has "+$@redpt+" points.",bc_map;
+	set $@bluegone, 0;
+	set $@bluecarrier$, "-";
+		if ($@redpt >= 5)
+		{
+		mapannounce "prt_are01", "The Red Team has won the match",0;
+		movenpc "blue_flag", 47, 150;
+		movenpc "red_flag",252,150;
+		set $@bluept, 0;
+		set $@redpt, 0;
+		set $@blueqt, 0;
+		set $@redqt, 0;
+		set $@bluecarrier$, "-";
+		set $@redcarrier$, "-";
+		set $@redwin, 1;
+		donpcevent "CTF::OnEventGameOverClassic";
+		}
+	}
+
+	if ($@reddropped == 1) 
+	{ 
+	//Return the Flag
+	movenpc "red_flag",252,150;
+	set $@redgone, 0; 
+	set $@reddropped, 0;
+	set #freturn, #freturn + 1;
+	set freturn, freturn + 1;
+	announce "The Red Flag has been returned.",bc_map; 
+	}
+}
+
+}
+
+}
+
+prt_are01,47,150,6	script	Blue Flag::blue_flag	1188,{
+
+npcspeed 100;
+
+getmapxy($@blueflag$,$@blueflagx,$@blueflagy,1);
+getmapxy($@bluetouch$,$@bluetouchx,$@bluetouchy,0);
+
+if (distance($@blueflagx,$@blueflagy,$@bluetouchx,$@bluetouchy) <= 2)
+{
+
+If (@team == 2)
+{ 
+	if ($@bluegone == 0) 
+	{
+	set $@bluegone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@bluecarrier$, strcharinfo(0);
+	announce ""+$@bluecarrier$+" has the Blue Flag!!",bc_map;
+	sc_start SC_DECREASEAGI, 10000, 10;
+	specialeffect2 38;
+	goto bluefollow;
+	} 
+
+ 	//Make the flag be picked up by the red team 
+	if ($@bluedropped == 1) 
+	{ 
+	set $@bluedropped, 0;
+	set $@bluegone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@bluecarrier$, strcharinfo(0); 
+	announce ""+$@bluecarrier$+" has the Blue Flag!!",bc_map;
+	sc_start SC_DECREASEAGI, 10000, 10;
+	specialeffect2 38;
+	goto bluefollow;
+	}
+
+	if (@novalue == 879)
+	{
+	bluefollow:
+
+	if (strcharinfo(0) == $@bluecarrier$)
+		{
+		getmapxy(@mapname$,@bluecarrierx,@bluecarriery,0,$@bluecarrier$);
+		npcwalkto (@bluecarrierx - 1), (@bluecarriery - 1);
+
+		set @blueagi, @blueagi + 1;
+		set @bluewarp, @bluewarp + 1;
+
+		if (@bluewarp == 30)
+			{
+			movenpc "blue_flag", @bluecarrierx, @bluecarriery;
+			set @bluewarp, 0;
+			}
+
+		if (@blueagi == 5)
+			{
+			sc_start SC_DECREASEAGI,10000,10;
+			specialeffect2 38;
+			set @blueagi, 0;
+			}
+		}
+
+	if (strcharinfo(0) != $@bluecarrier$)
+		{
+		end;
+		}
+
+	sleep2 500;
+	goto bluefollow;
+	}
+
+} 
+
+If (@team == 1) 
+{
+	if (($@redcarrier$ == strcharinfo(0)) && ($@bluedropped == 0) && ($@bluegone == 0))
+	{
+	movenpc "red_flag", 252, 150;
+	set $@bluept, $@bluept + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team has "+$@bluept+" points.",bc_map;
+	announce "The Red Team has "+$@redpt+" points.",bc_map;
+	set $@redgone, 0;
+	set $@redcarrier$, "-";
+		if ($@bluept >= 5)
+		{
+		mapannounce "prt_are01", "The Blue Team has won the match",0;
+		movenpc "blue_flag", 47, 150;
+		movenpc "red_flag",252,150;
+		set $@bluept, 0;
+		set $@redpt, 0;
+		set $@blueqt, 0;
+		set $@redqt, 0;
+		set $@bluecarrier$, "-";
+		set $@redcarrier$, "-";
+		set $@bluewin, 1;
+		donpcevent "CTF::OnEventGameOverClassic";
+		}
+	}
+
+	if ($@bluedropped == 1) 
+	{ 
+	//Return the Flag 
+	movenpc "blue_flag",47,150;
+	set $@bluegone, 0;
+	set $@bluedropped, 0;
+	set #freturn, #freturn + 1;
+	set freturn, freturn + 1;
+	announce "The Blue Flag has been returned.",bc_map; 
+	}
+}
+
+}
+
+}
+
+pvp_2vs2,60,39,2	script	Red Flag::hard_red_flag	1026,{
+
+npcspeed 100;
+
+getmapxy($@hredflag$,$@hredflagx,$@hredflagy,1);
+getmapxy($@hredtouch$,$@hredtouchx,$@hredtouchy,0);
+
+if (distance($@hredflagx,$@hredflagy,$@hredtouchx,$@hredtouchy) <= 2)
+{
+
+If (@team == 1) 
+{
+	if ($@hredgone == 0)
+	{ 
+	set $@hredgone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@hredcarrier$, strcharinfo(0);
+	announce ""+$@hredcarrier$+" has the Red Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_CURSE, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	specialeffect2 38;
+	goto hredfollow;
+	} 
+
+ 	//Make the flag be picked up by the blue team
+	if ($@hreddropped == 1)
+	{
+	set $@hreddropped, 0;
+	set $@hredgone, 1; 
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@hredcarrier$, strcharinfo(0);
+	announce ""+$@hredcarrier$+" has the Red Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_CURSE, 10000, 10;
+	specialeffect2 38;
+	goto hredfollow;
+	}
+
+	if (@novalue == 932847)
+	{
+	hredfollow:
+
+	if (strcharinfo(0) == $@hredcarrier$)
+		{
+		getmapxy(@mapname$,@hredcarrierx,@hredcarriery,0,$@hredcarrier$);
+		npcwalkto (@hredcarrierx + 1), (@hredcarriery - 1);
+
+		set @hredagi, @hredagi + 1;
+		set @hredwarp, @hredwarp + 1;
+
+		if (@hredwarp == 30)
+			{
+			movenpc "hard_red_flag", @hredcarrierx, @hredcarriery;
+			set @hredwarp, 0;
+			}
+
+		if (@hredagi == 5)
+			{
+			sc_start SC_DECREASEAGI,10000,10;
+			sc_start SC_SILENCE, 10000, 10;
+			sc_start SC_CURSE, 10000, 10;
+			specialeffect2 38;
+			set @hredagi, 0;
+			}
+		}
+
+	if (strcharinfo(0) != $@hredcarrier$)
+		{
+		end;
+		}
+
+	sleep2 500;
+	goto hredfollow;
+	}
+
+}
+
+If (@team == 2) 
+{
+	if (($@hbluecarrier$ == strcharinfo(0)) && ($@hreddropped == 0) && ($@hredgone == 0))
+	{
+	movenpc "hard_blue_flag", 19, 39;
+	set $@hredpt, $@hredpt + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team has "+$@hbluept+" points.",bc_map;
+	announce "The Red Team has "+$@hredpt+" points.",bc_map;
+	set $@hbluegone, 0;
+	set $@hbluecarrier$, "-";
+		if ($@hredpt >= 5)
+		{
+		mapannounce "pvp_2vs2", "The Red Team has won the match",0;
+		movenpc "hard_blue_flag", 19, 39;
+		movenpc "hard_red_flag",60, 39;
+		set $@hbluept, 0;
+		set $@hredpt, 0;
+		set $@hredqt, 0;
+		set $@hblueqt, 0;
+		set $@hbluecarrier$, "-";
+		set $@hredcarrier$, "-";
+		set $@hredwin, 1;
+		donpcevent "CTF::OnEventGameOverHardcore";
+		}
+	}
+
+	if ($@hreddropped == 1) 
+	{
+	//Return the Flag
+	movenpc "hard_red_flag",60,39;
+	set $@hredgone, 0; 
+	set $@hreddropped, 0;
+	set #freturn, #freturn + 1;
+	set freturn, freturn + 1;
+	announce "The Red Flag has been returned.",bc_map;  
+	}
+}
+
+}
+
+}
+
+pvp_2vs2,19,39,6	script	Blue Flag::hard_blue_flag	1188,{
+
+npcspeed 100;
+
+getmapxy($@hblueflag$,$@hblueflagx,$@hblueflagy,1);
+getmapxy($@hbluetouch$,$@hbluetouchx,$@hbluetouchy,0);
+
+if (distance($@hblueflagx,$@hblueflagy,$@hbluetouchx,$@hbluetouchy) <= 2)
+{
+
+If (@team == 2)
+{ 
+	if ($@hbluegone == 0) 
+	{
+	set $@hbluegone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@hbluecarrier$, strcharinfo(0);
+	announce ""+$@hbluecarrier$+" has the Blue Flag!!",bc_map;
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_CURSE, 10000, 10;
+	specialeffect2 38;
+	goto hbluefollow;
+	} 
+
+ 	//Make the flag be picked up by the red team 
+	if ($@hbluedropped == 1) 
+	{ 
+	set $@hbluedropped, 0;
+	set $@hbluegone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@hbluecarrier$, strcharinfo(0); 
+	announce ""+$@hbluecarrier$+" has the Blue Flag!!",bc_map;
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_CURSE, 10000, 10;
+	specialeffect2 38;
+	goto hbluefollow;
+	}
+
+	if (@novalue == 9832)
+	{
+	hbluefollow:
+
+	if (strcharinfo(0) == $@hbluecarrier$)
+		{
+		getmapxy(@mapname$,@hbluecarrierx,@hbluecarriery,0,$@hbluecarrier$);
+		npcwalkto (@hbluecarrierx - 1), (@hbluecarriery - 1);
+
+		set @hblueagi, @hblueagi + 1;
+		set @hbluewarp, @hbluewarp + 1;
+
+		if (@hbluewarp == 30)
+			{
+			movenpc "hard_blue_flag", @hbluecarrierx, @hbluecarriery;
+			set @hbluewarp, 0;
+			}
+
+		if (@hblueagi == 5)
+			{
+			sc_start SC_DECREASEAGI,10000,10;
+			sc_start SC_SILENCE, 10000, 10;
+			sc_start SC_CURSE, 10000, 10;
+			specialeffect2 38;
+			set @hblueagi, 0;
+			}
+		}
+
+	if (strcharinfo(0) != $@hbluecarrier$)
+		{
+		end;
+		}
+
+	sleep2 500;
+	goto hbluefollow;
+	}
+
+} 
+
+If (@team == 1) 
+{
+	if (($@hredcarrier$ == strcharinfo(0)) && ($@hbluedropped == 0) && ($@hbluegone == 0))
+	{
+	movenpc "hard_red_flag", 60, 39;
+	set $@hbluept, $@hbluept + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team has "+$@hbluept+" points.",bc_map;
+	announce "The Red Team has "+$@hredpt+" points.",bc_map;
+	set $@hredgone, 0;
+	set $@hredcarrier$, "-";
+
+		if ($@hbluept >= 5)
+		{
+		mapannounce "pvp_2vs2", "The Blue Team has won the match",0;
+		movenpc "hard_blue_flag", 19, 39;
+		movenpc "hard_red_flag",60,39;
+		set $@hbluept, 0;
+		set $@hredpt, 0;
+		set $@hredqt, 0;
+		set $@hblueqt, 0;
+		set $@hbluecarrier$, "-";
+		set $@hredcarrier$, "-";
+		set $@hbluewin, 1;
+		donpcevent "CTF::OnEventGameOverHardcore";
+		}
+	}
+
+	if ($@hbluedropped == 1) 
+	{ 
+	//Return the Flag
+	movenpc "hard_blue_flag",19,39;
+	set $@hbluegone, 0;
+	set $@hbluedropped, 0;
+	set #freturn, #freturn + 1;
+	set freturn, freturn + 1;
+	announce "The Blue Flag has been returned.",bc_map; 
+	}
+}
+
+}
+
+}
+
+pvp_y_5-2,210,130,2	script	Red Flag::single_red_flag	1026,{
+
+npcspeed 100;
+
+getmapxy($@sredflag$,$@sredflagx,$@sredflagy,1);
+getmapxy($@sredtouch$,$@sredtouchx,$@sredtouchy,0);
+
+if (distance($@sredflagx,$@sredflagy,$@sredtouchx,$@sredtouchy) <= 2)
+{
+
+If ((@team == 1) && ($@boff == 1) && ($@roundover == 0))
+{
+	if ($@sredgone == 0)
+	{ 
+	set $@sredgone, 1;
+	set $@suddendeath, 1;
+	set $@rresett, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@sredcarrier$, strcharinfo(0);
+	announce ""+$@sredcarrier$+" has the Red Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_DPOISON, 10000, 10;
+	specialeffect2 38;
+	goto sredfollow;
+	} 
+
+ 	//Make the flag be picked up by the blue team
+	if ($@sreddropped == 1)
+	{
+	set $@sreddropped, 0;
+	set $@sredgone, 1;
+	set $@suddendeath, 1;
+	set $@rresett, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@sredcarrier$, strcharinfo(0);
+	announce ""+$@sredcarrier$+" has the Red Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_DPOISON, 10000, 10;
+	specialeffect2 38;
+	goto sredfollow;
+	}
+
+	if (@novalue == 9324)
+	{
+	sredfollow:
+
+	if (strcharinfo(0) == $@sredcarrier$)
+		{
+		getmapxy(@mapname$,@sredcarrierx,@sredcarriery,0,$@sredcarrier$);
+		npcwalkto (@sredcarrierx + 1), (@sredcarriery - 1);
+
+		set @sredagi, @sredagi + 1;
+		set @sredwarp, @sredwarp + 1;
+
+		if (@sredwarp == 30)
+			{
+			movenpc "single_red_flag", @sredcarrierx, @sredcarriery;
+			set @sredwarp, 0;
+			}
+
+		if (@sredagi == 5)
+			{
+			sc_start SC_DECREASEAGI,10000,10;
+			sc_start SC_SILENCE, 10000, 10;
+			sc_start SC_DPOISON, 10000, 10;
+			specialeffect2 38;
+			set @sredagi, 0;
+			}
+		}
+
+	if (strcharinfo(0) != $@sredcarrier$)
+		{
+		end;
+		}
+
+	sleep2 500;
+	goto sredfollow;
+	}
+
+}
+
+If ((@team == 2) && ($@roff == 1) && ($@roundover == 0)) 
+{
+	if (($@sbluecarrier$ == strcharinfo(0)) && ($@sreddropped == 0) && ($@sredgone == 0))
+	{
+	donpcevent "CTF::OnEventRoundOver";
+	set $@sredpt, $@sredpt + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Red Team Scored!!",bc_map;
+	announce "The Blue Team has "+$@sbluept+" points.",bc_map;
+	announce "The Red Team has "+$@sredpt+" points.",bc_map;
+	set $@roundover, 1;
+
+		if ($@sredpt >= 5)
+		{
+		mapannounce "pvp_y_5-2", "The Red Team has won the match",0;
+		movenpc "single_blue_flag",53,130;
+		movenpc "single_red_flag",210,130;
+		set $@sbluept, 0;
+		set $@sredpt, 0;
+		set $@sblueqt, 0;
+		set $@sredqt, 0;
+		set $@sbluecarrier$, "-";
+		set $@sredcarrier$, "-";
+		set $@sredwin, 1;
+		donpcevent "CTF::OnEventGameOverSingle";
+		}
+	}
+}
+
+}
+
+}
+
+pvp_y_5-2,53,130,6	script	Blue Flag::single_blue_flag	1188,{
+
+npcspeed 100;
+
+getmapxy($@sblueflag$,$@sblueflagx,$@sblueflagy,1);
+getmapxy($@sbluetouch$,$@sbluetouchx,$@sbluetouchy,0);
+
+if (distance($@sblueflagx,$@sblueflagy,$@sbluetouchx,$@sbluetouchy) <= 2)
+{
+
+If ((@team == 2) && ($@roff == 1) && ($@roundover == 0))
+{ 
+	if ($@sbluegone == 0) 
+	{
+	set $@sbluegone, 1;
+	set $@suddendeath, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@bresett, 1;
+	set $@sbluecarrier$, strcharinfo(0);
+	setnpctimer 0;
+	announce ""+$@sbluecarrier$+" has the Blue Flag!!",bc_map;
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_DPOISON, 10000, 10;
+	specialeffect2 38;
+	goto sbluefollow;
+	} 
+
+ 	//Make the flag be picked up by the red team 
+	if ($@sbluedropped == 1) 
+	{ 
+	set $@sbluedropped, 0;
+	set $@sbluegone, 1;
+	set $@suddendeath, 1;
+	set $@bresett, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@sbluecarrier$, strcharinfo(0); 
+	setnpctimer 0;
+	announce ""+$@sbluecarrier$+" has the Blue Flag!!",bc_map;
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_DPOISON, 10000, 10;
+	specialeffect2 38;
+	goto sbluefollow;
+	}
+
+	if (@novalue == 89)
+	{
+	sbluefollow:
+
+	if (strcharinfo(0) == $@sbluecarrier$)
+		{
+		getmapxy(@mapname$,@sbluecarrierx,@sbluecarriery,0,$@sbluecarrier$);
+		npcwalkto (@sbluecarrierx - 1), (@sbluecarriery - 1);
+
+		set @sblueagi, @sblueagi + 1;
+		set @sbluewarp, @sbluewarp + 1;
+
+		if (@sbluewarp == 30)
+			{
+			movenpc "single_blue_flag", @sbluecarrierx, @sbluecarriery;
+			set @sbluewarp, 0;
+			}
+
+		if (@sblueagi == 5)
+			{
+			sc_start SC_DECREASEAGI,10000,10;
+			sc_start SC_SILENCE, 10000, 10;
+			sc_start SC_DPOISON, 10000, 10;
+			specialeffect2 38;
+			set @sblueagi, 0;
+			}
+		}
+
+	if (strcharinfo(0) != $@sbluecarrier$)
+		{
+		end;
+		}
+
+	sleep2 500;
+	goto sbluefollow;
+	}
+
+} 
+
+If ((@team == 1) && ($@boff == 1) && ($@roundover == 0))
+{
+	if (($@sredcarrier$ == strcharinfo(0)) && ($@sbluedropped == 0) && ($@sbluegone == 0))
+	{
+	donpcevent "CTF::OnEventRoundOver";
+	set $@sbluept, $@sbluept + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team Scored!!",bc_map;
+	announce "The Blue Team has "+$@sbluept+" points.",bc_map;
+	announce "The Red Team has "+$@sredpt+" points.",bc_map; 
+	set $@roundover, 1;
+
+		if ($@sbluept >= 5)
+		{
+		mapannounce "pvp_y_5-2", "The Blue Team has won the match",0;
+		movenpc "single_blue_flag",53,130;
+		movenpc "single_red_flag",210,130;
+		set $@sbluept, 0;
+		set $@sredpt, 0;
+		set $@sblueqt, 0;
+		set $@sredqt, 0;
+		set $@sbluecarrier$, "-";
+		set $@sredcarrier$, "-";
+		set $@sbluewin, 1;
+		donpcevent "CTF::OnEventGameOverSingle";
+		}
+
+	}
+}
+
+}
+
+}
+
+tha_t10,127,124,4	script	Flag::neutral_flag	1512,{
+
+npcspeed 100;
+
+getmapxy($@nflag$,$@nflagx,$@nflagy,1);
+getmapxy($@ntouch$,$@ntouchx,$@ntouchy,0);
+
+if (distance($@nflagx,$@nflagy,$@ntouchx,$@ntouchy) <= 2)
+{
+
+if (@team == 2)
+	{
+	set @teammate$, " Red member,";
+	}
+
+if (@team == 1)
+	{
+	set @teammate$, " Blue member,";
+	}
+
+if ($@flaggone == 0)
+	{
+	set $@flagresett, 1;
+	set $@flaggone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@flagcarrier$, strcharinfo(0);
+	announce ""+@teammate$+" "+$@flagcarrier$+" has the Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_DPOISON, 10000, 10;
+	specialeffect2 38;
+	goto neutralfollow;
+	} 
+
+if ($@flagdropped == 1)
+	{
+	set $@flagresett, 1;
+	set $@flagdropped, 0;
+	set $@flaggone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@flagcarrier$, strcharinfo(0);
+	announce ""+$@flagcarrier$+" has the Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_DPOISON, 10000, 10;
+	specialeffect2 38;
+	goto neutralfollow;
+	}
+
+	if (@novalue == 6969696969)
+	{
+	neutralfollow:
+
+	if (strcharinfo(0) == $@flagcarrier$)
+		{
+		getmapxy(@mapname$,@flagcarrierx,@flagcarriery,0,$@flagcarrier$);
+		npcwalkto (@flagcarrierx - 2), (@flagcarriery);
+
+		set @flagagi, @flagagi + 1;
+		set @flagwarp, @flagwarp + 1;
+
+		if (@flagwarp == 30)
+			{
+			movenpc "neutral_flag", @flagcarrierx, @flagcarriery;
+			set @flagwarp, 0;
+			}
+
+		if (@flagagi == 5)
+			{
+			sc_start SC_DECREASEAGI,10000,10;
+			sc_start SC_SILENCE, 10000, 10;
+			sc_start SC_DPOISON, 10000, 10;
+			specialeffect2 38;
+			set @flagagi, 0;
+			}
+		}
+
+	if (strcharinfo(0) != $@flagcarrier$)
+		{
+		end;
+		}
+
+	sleep2 500;
+	goto neutralfollow;
+	}
+
+}
+
+end;
+}
+
+tha_t10,100,156,4	script	Red Base::red_base	1026,{
+
+getmapxy($@redbase$,$@redbasex,$@redbasey,1);
+getmapxy($@rbasetouch$,$@rbasetouchx,$@rbasetouchy,0);
+
+if (distance($@redbasex,$@redbasey,$@rbasetouchx,$@rbasetouchy) <= 2)
+{
+
+If (@team == 2) 
+{
+	if ($@flagcarrier$ == strcharinfo(0))
+	{
+	movenpc "neutral_flag",127,124;
+	set $@nredpt, $@nredpt + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team has "+$@nbluept+" points.",bc_map;
+	announce "The Red Team has "+$@nredpt+" points.",bc_map;
+	set $@flaggone, 0;
+	set $@flagcarrier$, "-";
+
+		if ($@nredpt >= 5)
+		{
+		mapannounce "tha_t10", "The Red Team has won the match",0;
+		set $@nbluept, 0;
+		set $@nredpt, 0;
+		set $@nblueqt, 0;
+		set $@nredqt, 0;
+		set $@flagcarrier$, "-";
+		set $@nredwin, 1;
+		donpcevent "CTF::OnEventGameOverNeutral";
+		}
+	}
+}
+
+}
+
+}
+
+tha_t10,157,100,4	script	Blue Base::blue_base	1188,{
+
+getmapxy($@bluebase$,$@bluebasex,$@bluebasey,1);
+getmapxy($@bbasetouch$,$@bbasetouchx,$@bbasetouchy,0);
+
+if (distance($@bluebasex,$@bluebasey,$@bbasetouchx,$@bbasetouchy) <= 2)
+{
+
+If (@team == 1) 
+{
+	if ($@flagcarrier$ == strcharinfo(0))
+	{
+	movenpc "neutral_flag",127,124;
+	set $@nbluept, $@nbluept + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team has "+$@nbluept+" points.",bc_map;
+	announce "The Red Team has "+$@nredpt+" points.",bc_map;
+	set $@flaggone, 0;
+	set $@flagcarrier$, "-";
+
+		if ($@nbluept >= 5)
+		{
+		mapannounce "tha_t10", "The Blue Team has won the match",0;
+		set $@nbluept, 0;
+		set $@nredpt, 0;
+		set $@nblueqt, 0;
+		set $@nredqt, 0;
+		set $@flagcarrier$, "-";
+		set $@nbluewin, 1;
+		donpcevent "CTF::OnEventGameOverNeutral";
+		}
+	}
+}
+
+}
+
+}
+
+//poring_w02,98,41,2	script	Red Flag::classicgvg_red_flag	1026,{
+poring_w02,98,30,2	script	Red Flag::classicgvg_red_flag	1026,{
+
+npcspeed 100;
+
+getmapxy($@gredflag$,$@gredflagx,$@gredflagy,1);
+getmapxy($@gredtouch$,$@gredtouchx,$@gredtouchy,0);
+
+if (distance($@gredflagx,$@gredflagy,$@gredtouchx,$@gredtouchy) <= 2)
+{
+
+If (@team == 1) 
+{
+	if ($@gredgone == 0)
+	{ 
+	set $@gredgone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@gredcarrier$, strcharinfo(0);
+	announce ""+$@gredcarrier$+" has the Red Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	specialeffect2 38;
+	goto gredfollow;
+	} 
+
+ 	//Make the flag be picked up by the blue team
+	if ($@greddropped == 1)
+	{
+	set $@greddropped, 0;
+	set $@gredgone, 1; 
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@gredcarrier$, strcharinfo(0);
+	announce ""+$@gredcarrier$+" has the Red Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	specialeffect2 38;
+	goto gredfollow;
+	}
+
+	if (@novalue == 932847)
+	{
+	gredfollow:
+
+	if (strcharinfo(0) == $@gredcarrier$)
+		{
+		getmapxy(@mapname$,@gredcarrierx,@gredcarriery,0,$@gredcarrier$);
+		npcwalkto (@gredcarrierx + 1), (@gredcarriery - 1);
+
+		set @gredagi, @gredagi + 1;
+		set @gredwarp, @gredwarp + 1;
+
+		if (@gredwarp == 30)
+			{
+			movenpc "classicgvg_red_flag", @gredcarrierx, @gredcarriery;
+			set @gredwarp, 0;
+			}
+
+		if (@gredagi == 5)
+			{
+			sc_start SC_DECREASEAGI,10000,10;
+			sc_start SC_SILENCE, 10000, 10;
+			specialeffect2 38;
+			set @gredagi, 0;
+			}
+		}
+
+	if (strcharinfo(0) != $@gredcarrier$)
+		{
+		end;
+		}
+
+	sleep2 500;
+	goto gredfollow;
+	}
+
+}
+
+If (@team == 2) 
+{
+	if (($@gbluecarrier$ == strcharinfo(0)) && ($@greddropped == 0) && ($@gredgone == 0))
+	{
+	//movenpc "classicgvg_blue_flag",98,124;
+	movenpc "classicgvg_blue_flag",98,135;
+	set $@gredpt, $@gredpt + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team has "+$@gbluept+" points.",bc_map;
+	announce "The Red Team has "+$@gredpt+" points.",bc_map;
+	set $@gbluegone, 0;
+	set $@gbluecarrier$, "-";
+		if ($@gredpt >= 5)
+		{
+		mapannounce "poring_w02", "The Red Team has won the match",0;
+		//movenpc "classicgvg_blue_flag",98,124;
+		//movenpc "classicgvg_red_flag",98,41;
+		movenpc "classicgvg_red_flag",98,30;
+		movenpc "classicgvg_blue_flag",98,135;
+		set $@gbluept, 0;
+		set $@gredpt, 0;
+		set $@gredqt, 0;
+		set $@gblueqt, 0;
+		set $@gbluecarrier$, "-";
+		set $@gredcarrier$, "-";
+		set $@gredwin, 1;
+		donpcevent "CTF::OnEventGameOverCgvg";
+		}
+	}
+
+	if ($@greddropped == 1) 
+	{
+	//Return the Flag
+	//movenpc "classicgvg_red_flag",98,41;
+	movenpc "classicgvg_red_flag",98,30;
+	set $@gredgone, 0; 
+	set $@greddropped, 0;
+	set #freturn, #freturn + 1;
+	set freturn, freturn + 1;
+	announce "The Red Flag has been returned.",bc_map;  
+	}
+}
+
+}
+
+}
+
+//poring_w02,98,124,6	script	Blue Flag::classicgvg_blue_flag	1188,{
+poring_w02,98,135,6	script	Blue Flag::classicgvg_blue_flag	1188,{
+
+npcspeed 100;
+
+getmapxy($@gblueflag$,$@gblueflagx,$@gblueflagy,1);
+getmapxy($@gbluetouch$,$@gbluetouchx,$@gbluetouchy,0);
+
+if (distance($@gblueflagx,$@gblueflagy,$@gbluetouchx,$@gbluetouchy) <= 2)
+{
+
+If (@team == 2)
+{ 
+	if ($@gbluegone == 0) 
+	{
+	set $@gbluegone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@gbluecarrier$, strcharinfo(0);
+	announce ""+$@gbluecarrier$+" has the Blue Flag!!",bc_map;
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	specialeffect2 38;
+	goto gbluefollow;
+	} 
+
+ 	//Make the flag be picked up by the red team 
+	if ($@gbluedropped == 1) 
+	{ 
+	set $@gbluedropped, 0;
+	set $@gbluegone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@gbluecarrier$, strcharinfo(0); 
+	announce ""+$@gbluecarrier$+" has the Blue Flag!!",bc_map;
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	specialeffect2 38;
+	goto gbluefollow;
+	}
+
+	if (@novalue == 9832)
+	{
+	gbluefollow:
+
+	if (strcharinfo(0) == $@gbluecarrier$)
+		{
+		getmapxy(@mapname$,@gbluecarrierx,@gbluecarriery,0,$@gbluecarrier$);
+		npcwalkto (@gbluecarrierx - 1), (@gbluecarriery - 1);
+
+		set @gblueagi, @gblueagi + 1;
+		set @gbluewarp, @gbluewarp + 1;
+
+		if (@gbluewarp == 30)
+			{
+			movenpc "classicgvg_blue_flag", @gbluecarrierx, @gbluecarriery;
+			set @gbluewarp, 0;
+			}
+
+		if (@gblueagi == 5)
+			{
+			sc_start SC_DECREASEAGI,10000,10;
+			sc_start SC_SILENCE, 10000, 10;
+			specialeffect2 38;
+			set @gblueagi, 0;
+			}
+		}
+
+	if (strcharinfo(0) != $@gbluecarrier$)
+		{
+		end;
+		}
+
+	sleep2 500;
+	goto gbluefollow;
+	}
+
+} 
+
+If (@team == 1) 
+{
+	if (($@gredcarrier$ == strcharinfo(0)) && ($@gbluedropped == 0) && ($@gbluegone == 0))
+	{
+	//movenpc "classicgvg_red_flag",98,41;
+	movenpc "classicgvg_red_flag",98,30;
+	set $@gbluept, $@gbluept + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team has "+$@gbluept+" points.",bc_map;
+	announce "The Red Team has "+$@gredpt+" points.",bc_map;
+	set $@gredgone, 0;
+	set $@gredcarrier$, "-";
+
+		if ($@gbluept >= 5)
+		{
+		mapannounce "poring_w02", "The Blue Team has won the match",0;
+		//movenpc "classicgvg_blue_flag",98,124;
+		//movenpc "classicgvg_red_flag",98,41;
+		movenpc "classicgvg_red_flag",98,30;
+		movenpc "classicgvg_blue_flag",98,135;
+		set $@gbluept, 0;
+		set $@gredpt, 0;
+		set $@gredqt, 0;
+		set $@gblueqt, 0;
+		set $@gbluecarrier$, "-";
+		set $@gredcarrier$, "-";
+		set $@gbluewin, 1;
+		donpcevent "CTF::OnEventGameOverCgvg";
+		}
+	}
+
+	if ($@gbluedropped == 1) 
+	{ 
+	//Return the Flag
+	//movenpc "classicgvg_blue_flag",98,124;
+	movenpc "classicgvg_blue_flag",98,135;
+	set $@gbluegone, 0;
+	set $@gbluedropped, 0;
+	set #freturn, #freturn + 1;
+	set freturn, freturn + 1;
+	announce "The Blue Flag has been returned.",bc_map; 
+	}
+}
+
+}
+
+}
+
+pvp_y_7-1,156,195,4	script	Flag::prontera_neutral_flag	1512,{
+
+npcspeed 100;
+
+getmapxy($@nnflag$,$@nnflagx,$@nnflagy,1);
+getmapxy($@nntouch$,$@nntouchx,$@nntouchy,0);
+
+if (distance($@nnflagx,$@nnflagy,$@nntouchx,$@nntouchy) <= 2)
+{
+
+if (@team == 2)
+	{
+	set @teammate$, " Red member,";
+	}
+
+if (@team == 1)
+	{
+	set @teammate$, " Blue member,";
+	}
+
+if ($@nflaggone == 0)
+	{
+	set $@nflagresett, 1;
+	set $@nflaggone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@nflagcarrier$, strcharinfo(0);
+	announce ""+@teammate$+" "+$@nflagcarrier$+" has the Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_DPOISON, 10000, 10;
+	specialeffect2 38;
+
+	if (@team == 2)
+		{
+		set $@warp, 1;
+		mapannounce "pvp_y_7-1", "The Blue Gate is Open.",0;
+		}
+
+	if (@team == 1)
+		{
+		set $@warp, 2;
+		mapannounce "pvp_y_7-1", "The Red Gate is Open.",0;
+		}
+
+	goto pneutralfollow;
+	} 
+
+if ($@nflagdropped == 1)
+	{
+	set $@nflagresett, 1;
+	set $@nflagdropped, 0;
+	set $@nflaggone, 1;
+	set #ftaken, #ftaken + 1;
+	set ftaken, ftaken + 1;
+	set $@nflagcarrier$, strcharinfo(0);
+	announce ""+$@nflagcarrier$+" has the Flag!!",bc_map; 
+	sc_start SC_DECREASEAGI, 10000, 10;
+	sc_start SC_SILENCE, 10000, 10;
+	sc_start SC_DPOISON, 10000, 10;
+	specialeffect2 38;
+
+	if (@team == 2)
+		{
+		set $@warp, 1;
+		mapannounce "pvp_y_7-1", "The Blue Gate is Open.",0;
+		}
+
+	if (@team == 1)
+		{
+		set $@warp, 2;
+		mapannounce "pvp_y_7-1", "The Red Gate is Open.",0;
+		}
+
+	goto pneutralfollow;
+	}
+
+	if (@novalue == 6969696969)
+	{
+	pneutralfollow:
+
+	if (strcharinfo(0) == $@nflagcarrier$)
+		{
+		getmapxy(@mapname$,@nflagcarrierx,@nflagcarriery,0,$@nflagcarrier$);
+		npcwalkto (@nflagcarrierx), (@nflagcarriery + 2);
+
+		set @nflagagi, @nflagagi + 1;
+		set @nflagwarp, @nflagwarp + 1;
+
+		if (@nflagwarp == 30)
+			{
+			movenpc "prontera_neutral_flag", @nflagcarrierx, @nflagcarriery;
+			set @nflagwarp, 0;
+			}
+
+		if (@nflagagi == 5)
+			{
+			sc_start SC_DECREASEAGI,10000,10;
+			sc_start SC_SILENCE, 10000, 10;
+			sc_start SC_DPOISON, 10000, 10;
+			specialeffect2 38;
+			set @nflagagi, 0;
+			}
+		}
+
+	if (strcharinfo(0) != $@nflagcarrier$)
+		{
+		end;
+		}
+
+	sleep2 500;
+	goto pneutralfollow;
+	}
+
+}
+
+end;
+}
+
+pvp_y_7-1,272,204,4	script	Red Base::prontera_red_base	1026,{
+
+getmapxy($@nnredbase$,$@nnredbasex,$@nnredbasey,1);
+getmapxy($@nnrbasetouch$,$@nnrbasetouchx,$@nnrbasetouchy,0);
+
+if (distance($@nnredbasex,$@nnredbasey,$@nnrbasetouchx,$@nnrbasetouchy) <= 2)
+{
+
+If (@team == 2) 
+{
+	if ($@nflagcarrier$ == strcharinfo(0))
+	{
+	movenpc "prontera_neutral_flag",156,195;
+	set $@warp, 0;
+	set $@nnredpt, $@nnredpt + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team has "+$@nnbluept+" points.",bc_map;
+	announce "The Red Team has "+$@nnredpt+" points.",bc_map;
+	set $@nflaggone, 0;
+	set $@nflagcarrier$, "-";
+
+		if ($@nnredpt >= 5)
+		{
+		mapannounce "pvp_y_7-1", "The Red Team has won the match",0;
+		set $@nnbluept, 0;
+		set $@nnredpt, 0;
+		set $@nnblueqt, 0;
+		set $@nnredqt, 0;
+		set $@nflagcarrier$, "-";
+		set $@nnredwin, 1;
+		donpcevent "CTF::OnEventGameOverPneutral";
+		}
+	}
+}
+
+}
+
+}
+
+pvp_y_7-1,40,204,4	script	Blue Base::prontera_blue_base	1188,{
+
+getmapxy($@nnbluebase$,$@nnbluebasex,$@nnbluebasey,1);
+getmapxy($@nnbbasetouch$,$@nnbbasetouchx,$@nnbbasetouchy,0);
+
+if (distance($@nnbluebasex,$@nnbluebasey,$@nnbbasetouchx,$@nnbbasetouchy) <= 2)
+{
+
+If (@team == 1) 
+{
+	if ($@nflagcarrier$ == strcharinfo(0))
+	{
+	movenpc "prontera_neutral_flag",156,195;
+	set $@warp, 0;
+	set $@nnbluept, $@nnbluept + 1;
+	set #fcapt, #fcapt + 1;
+	set fcapt, fcapt + 1;
+	set ctfpt, ctfpt + 10;
+	set tctfpt, tctfpt + 10;
+	announce "The Blue Team has "+$@nnbluept+" points.",bc_map;
+	announce "The Red Team has "+$@nnredpt+" points.",bc_map;
+	set $@nflaggone, 0;
+	set $@nflagcarrier$, "-";
+
+		if ($@nnbluept >= 5)
+		{
+		mapannounce "pvp_y_7-1", "The Blue Team has won the match",0;
+		set $@nnbluept, 0;
+		set $@nnredpt, 0;
+		set $@nnblueqt, 0;
+		set $@nnredqt, 0;
+		set $@nflagcarrier$, "-";
+		set $@nnbluewin, 1;
+		donpcevent "CTF::OnEventGameOverPneutral";
+		}
+	}
+}
+
+}
+
+}
+
+-	script	healer::red_ctf_healer	829,{
+
+if ((@heal == 0) && (@team == 2))
+	{
+	percentheal 100,100;
+	set @heal, 1;
+	}
+
+}
+
+-	script	healer::blue_ctf_healer	829,{
+
+if ((@heal == 0) && (@team == 1))
+	{
+	percentheal 100,100;
+	set @heal, 1;
+	}
+
+}
+
+-	script	leave_ctf::escape_npc	780,{
+
+mes "Would you like to leave Capture the Flag?";
+
+menu "No",no,"Yes",yes,"Cancel",-;
+close;
+
+yes:
+getmapxy(@checkmap$,@checkx,@checky,0);
+if (@checkmap$ == "prt_are01")
+{
+mapannounce "prt_are01", ""+strcharinfo(0)+" has left the game.",0;
+set @cmapuser, getmapusers ("prt_are01");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @classic, 0;
+
+if (@cmapuser == 1)
+	{
+	movenpc "blue_flag", 47, 150;
+	movenpc "red_flag",252,150;
+	set $@bluept, 0;
+	set $@redpt, 0;
+	set $@bluecarrier$, "-";
+	set $@redcarrier$, "-";
+	set $@reddropped, 0;
+	set $@redgone, 0;
+	set $@bluedropped, 0;
+	set $@bluegone, 0;
+	}
+
+if ($@redcarrier$ == strcharinfo(0))
+	{
+	mapannounce "prt_are01", ""+$@redcarrier$+" dropped the Red Flag.",0;
+	set $@redcarrier$, "-";
+	set $@reddropped, 1;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+if ($@bluecarrier$ == strcharinfo(0))
+	{
+	mapannounce "prt_are01", ""+$@bluecarrier$+" dropped the Blue Flag.",0;
+	set $@bluecarrier$, "-";
+	set $@bluedropped, 1;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+//lowers the team count for leaving the game
+
+if (@team == 2)
+	{
+	set $@redqt, $@redqt - 1;
+	}
+
+	if (@team == 1)
+	{
+	set $@blueqt, $@blueqt - 1;
+	}
+warp originmap$, (originx), (originy);
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@classic); set @i, @i+1) {
+	if ($@classic[@i] == getcharid(3))
+		{
+		setarray $@classic[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@classic); set @i, @i+1) {
+	setarray $@classic[@i], $@classic[@i+1];
+}
+
+}
+
+if (@checkmap$ == "pvp_2vs2")
+{
+mapannounce "pvp_2vs2", ""+strcharinfo(0)+" has left the game.",0;
+set @hmapuser, getmapusers ("pvp_2vs2");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @hardcore, 0;
+
+if ($@hredcarrier$ == strcharinfo(0))
+	{
+	mapannounce "pvp_2vs2", ""+$@hredcarrier$+" dropped the Red Flag.",0;
+	set $@hredcarrier$, "-";
+	set $@hreddropped, 1;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+if ($@hbluecarrier$ == strcharinfo(0))
+	{
+	mapannounce "pvp_2vs2", ""+$@hbluecarrier$+" dropped the Blue Flag.",0;
+	set $@hbluecarrier$, "-";
+	set $@hbluedropped, 1;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+//lowers the team count for leaving the game
+
+	if (@team == 2)
+	{
+	set $@hredqt, $@hredqt - 1;
+	}
+
+	if (@team == 1)
+	{
+	set $@hblueqt, $@hblueqt - 1;
+	}
+
+if (@hmapuser == 1)
+	{
+	movenpc "hard_blue_flag", 19, 39;
+	movenpc "hard_red_flag",60,39;
+	set $@hbluept, 0;
+	set $@hredpt, 0;
+	set $@hbluecarrier$, "-";
+	set $@hredcarrier$, "-";
+	set $@hreddropped, 0;
+	set $@hredgone, 0;
+	set $@hbluedropped, 0;
+	set $@hbluegone, 0;
+	}
+
+warp originmap$, (originx), (originy);
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@hardcore); set @i, @i+1) {
+	if ($@hardcore[@i] == getcharid(3))
+		{
+		setarray $@hardcore[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@hardcore); set @i, @i+1) {
+	setarray $@hardcore[@i], $@hardcore[@i+1];
+}
+
+}
+
+if (@checkmap$ == "pvp_y_5-2")
+{
+mapannounce "pvp_y_5-2", ""+strcharinfo(0)+" has left the game.",0;
+set @smapuser, getmapusers ("pvp_y_5-2");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @single, 0;
+
+if (@smapuser == 1)
+	{
+	movenpc "single_blue_flag",53,130;
+	movenpc "single_red_flag",210,130;
+	set $@sbluept, 0;
+	set $@sredpt, 0;
+	set $@sbluecarrier$, "-";
+	set $@sredcarrier$, "-";
+	set $@sreddropped, 0;
+	set $@sredgone, 0;
+	set $@sbluedropped, 0;
+	set $@sbluegone, 0;
+	}
+
+if ($@sredcarrier$ == strcharinfo(0))
+	{
+	mapannounce "pvp_y_5-2", ""+$@sredcarrier$+" dropped the Red Flag.",0;
+	set $@sredcarrier$, "-";
+	set $@sreddropped, 1;
+	set $@suddendeath, 0;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+if ($@sbluecarrier$ == strcharinfo(0))
+	{
+	mapannounce "pvp_y_5-2", ""+$@sbluecarrier$+" dropped the Blue Flag.",0;
+	set $@sbluecarrier$, "-";
+	set $@sbluedropped, 1;
+	set $@suddendeath, 0;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+//lowers the team count for leaving the game
+
+if (@team == 2)
+	{
+	set $@sredqt, $@sredqt - 1;
+	}
+
+	if (@team == 1)
+	{
+	set $@sblueqt, $@sblueqt - 1;
+	}
+
+warp originmap$, (originx), (originy);
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@single); set @i, @i+1) {
+	if ($@single[@i] == getcharid(3))
+		{
+		setarray $@single[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@single); set @i, @i+1) {
+	setarray $@single[@i], $@single[@i+1];
+}
+}
+
+if (@checkmap$ == "tha_t10")
+{
+mapannounce "tha_t10", ""+strcharinfo(0)+" has left the game.",0;
+set @nmapuser, getmapusers ("tha_t10");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @neutral, 0;
+
+//lowers the team count for leaving the game
+
+if (@team == 2)
+	{
+	set $@nredqt, $@nredqt - 1;
+	}
+
+if (@team == 1)
+	{
+	set $@nblueqt, $@nblueqt - 1;
+	}
+
+warp originmap$, (originx), (originy);
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@neutral); set @i, @i+1) {
+	if ($@neutral[@i] == getcharid(3))
+		{
+		setarray $@neutral[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@neutral); set @i, @i+1) {
+	setarray $@neutral[@i], $@neutral[@i+1];
+}
+
+if (@nmapuser == 1)
+	{
+	movenpc "neutral_flag",127,124;
+	set $@nbluept, 0;
+	set $@nredpt, 0;
+	set $@flagcarrier$, "-";
+	set $@flagresett, 0;
+	set $@flaggone, 0;
+	set $@flagdropped, 0;
+	}
+
+if ($@flagcarrier$ == strcharinfo(0))
+	{
+	mapannounce "tha_t10", ""+$@flagcarrier$+" dropped the Flag.",0;
+	set $@flagcarrier$, "-";
+	set $@flagdropped, 1;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+
+	OnFlagRespawn:
+	set $@idol, $@idol + 1;
+
+	if ($@flagresett == 1)
+		{
+		set $@idol, 0;
+		goto nflgrspwn;
+		end;
+		}
+
+	if ($@idol == 30)
+		{
+		movenpc "neutral_flag",127,124;
+		set $@idol, 0;
+		set $@flaggone, 0;
+		set $@flagdropped, 0;
+		announce "The Flag has been returned.",bc_map;
+		end;
+		}
+
+	sleep2 1000;
+	goto OnFlagRespawn;
+	end;
+	}
+nflgrspwn:
+}
+
+if (@checkmap$ == "poring_w02")
+{
+mapannounce "poring_w02", ""+strcharinfo(0)+" has left the game.",0;
+set @gmapuser, getmapusers ("poring_w02");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @classicgvg, 0;
+
+if ($@gredcarrier$ == strcharinfo(0))
+	{
+	mapannounce "poring_w02", ""+$@gredcarrier$+" dropped the Red Flag.",0;
+	set $@gredcarrier$, "-";
+	set $@greddropped, 1;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+if ($@gbluecarrier$ == strcharinfo(0))
+	{
+	mapannounce "poring_w02", ""+$@gbluecarrier$+" dropped the Blue Flag.",0;
+	set $@gbluecarrier$, "-";
+	set $@gbluedropped, 1;
+	set #fdrop, #fdrop + 1;
+	set fdrop, fdrop + 1;
+	}
+
+//lowers the team count for leaving the game
+
+	if (@team == 2)
+	{
+	set $@gredqt, $@gredqt - 1;
+	}
+
+	if (@team == 1)
+	{
+	set $@gblueqt, $@gblueqt - 1;
+	}
+
+if (@gmapuser == 1)
+	{
+	//movenpc "classicgvg_blue_flag",98,124;
+	//movenpc "classicgvg_red_flag",98,41;
+	movenpc "classicgvg_blue_flag",98,135;
+	movenpc "classicgvg_red_flag",98,30;
+	set $@gbluept, 0;
+	set $@gredpt, 0;
+	set $@gbluecarrier$, "-";
+	set $@gredcarrier$, "-";
+	set $@greddropped, 0;
+	set $@gredgone, 0;
+	set $@gbluedropped, 0;
+	set $@gbluegone, 0;
+	}
+
+warp originmap$, (originx), (originy);
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@classicgvg); set @i, @i+1) {
+	if ($@classicgvg[@i] == getcharid(3))
+		{
+		setarray $@classicgvg[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@classicgvg); set @i, @i+1) {
+	setarray $@classicgvg[@i], $@classicgvg[@i+1];
+}
+
+}
+
+if (@checkmap$ == "pvp_y_7-1")
+{
+mapannounce "pvp_y_7-1", ""+strcharinfo(0)+" has left the game.",0;
+set @nnmapuser, getmapusers ("pvp_y_7-1");
+set @heal, 0;
+setlook 6, hair;
+setlook 7, body;
+save originmap$, (originx), (originy);
+set @pneutral, 0;
+
+//lowers the team count for leaving the game
+
+if (@team == 2)
+	{
+	set $@nnredqt, $@nnredqt - 1;
+	}
+
+if (@team == 1)
+	{
+	set $@nnblueqt, $@nnblueqt - 1;
+	}
+
+if (@nnmapuser == 1)
+	{
+	movenpc "prontera_neutral_flag",156,195;
+	set $@nnbluept, 0;
+	set $@nnredpt, 0;
+	set $@nflagcarrier$, "-";
+	set $@nflagresett, 0;
+	set $@nflaggone, 0;
+	set $@nflagdropped, 0;
+	}
+
+warp originmap$, (originx), (originy);
+
+set @ctf, 0;
+for (set @i, 0; @i < getarraysize($@pneutral); set @i, @i+1) {
+	if ($@pneutral[@i] == getcharid(3))
+		{
+		setarray $@pneutral[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@pneutral); set @i, @i+1) {
+	setarray $@pneutral[@i], $@pneutral[@i+1];
+}
+
+if ($@nflagcarrier$ == strcharinfo(0))
+	{
+	mapannounce "pvp_y_7-1", ""+$@nflagcarrier$+" dropped the Flag.",0;
+	set $@warp, 0;
+	set $@nflagcarrier$, "-";
+	set $@nflagdropped, 1;
+	set #fdrop, #fdrop + 1;
+
+	OnNFlagRespawn:
+	set $@nidol, $@nidol + 1;
+
+	if ($@nflagresett == 1)
+		{
+		set $@nidol, 0;
+		goto nnflgrspwn;
+		end;
+		}
+
+	if ($@nidol == 30)
+		{
+		movenpc "prontera_neutral_flag",156,195;
+		set $@nidol, 0;
+		set $@nflaggone, 0;
+		set $@nflagdropped, 0;
+		announce "The Flag has been returned.",bc_map;
+		end;
+		}
+
+	sleep2 1000;
+	goto OnNFlagRespawn;
+	end;
+	}
+nnflgrspwn:
+}
+
+set colorchange, 0;
+setlook 6, hair;
+setlook 7, body;
+set Hp, charhp;
+set Sp, charsp;
+set @heal, 0;
+set @playing, 0;
+set @team, 0;
+warp originmap$, (originx), (originy);
+save originmap$, (originx), (originy);
+end;
+
+no:
+mes "Ok, carry on.";
+close;
+}
+
+
+-	script	left_warper::left_warper	836,{
+
+if (@team == 1)
+{
+sleep2 1000;
+set @newsave, rand(1,3);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(82,97);
+		set @savey, rand(132,135);
+		warp "poring_w02", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(82,85);
+		set @savey, rand(108,131);
+		warp "poring_w02", (@savex), (@savey);
+		}
+
+	if (@newsave == 3)
+		{
+		set @savex, rand(70,77);
+		set @savey, rand(116,127);
+		warp "poring_w02", (@savex), (@savey);
+		}
+}
+
+if (@team == 2)
+{
+sleep2 1000;
+set @newsave, rand(1,3);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(82,97);
+		set @savey, rand(30,33);
+		warp "poring_w02", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(82,85);
+		set @savey, rand(34,57);
+		warp "poring_w02", (@savex), (@savey);
+		}
+
+	if (@newsave == 3)
+		{
+		set @savex, rand(70,77);
+		set @savey, rand(38,49);
+		warp "poring_w02", (@savex), (@savey);
+		}
+}
+
+percentheal 100,100;
+}
+
+-	script	right_warper::right_warper	836,{
+
+if (@team == 1)
+{
+sleep2 1000;
+set @newsave, rand(1,3);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(98,115);
+		set @savey, rand(132,135);
+		warp "poring_w02", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(112,115);
+		set @savey, rand(108,131);
+		warp "poring_w02", (@savex), (@savey);
+		}
+
+	if (@newsave == 3)
+		{
+		set @savex, rand(120,127);
+		set @savey, rand(116,127);
+		warp "poring_w02", (@savex), (@savey);
+		}
+}
+
+if (@team == 2)
+{
+sleep2 1000;
+set @newsave, rand(1,3);
+
+	if (@newsave == 1)
+		{
+		set @savex, rand(98,115);
+		set @savey, rand(30,33);
+		warp "poring_w02", (@savex), (@savey);
+		}
+
+	if (@newsave == 2)
+		{
+		set @savex, rand(112,115);
+		set @savey, rand(34,57);
+		warp "poring_w02", (@savex), (@savey);
+		}
+
+	if (@newsave == 3)
+		{
+		set @savex, rand(120,127);
+		set @savey, rand(38,49);
+		warp "poring_w02", (@savex), (@savey);
+		}
+}
+
+percentheal 100,100;
+}
+
+-	script	red_warper::red_warper	723¦2,{
+
+if ((@team == 2) && ($@warp == 2))
+	{
+	warp "pvp_y_7-1",91,204;
+	}
+}
+
+-	script	blue_warper::blue_warper	723¦2,{
+
+if ((@team == 1) && ($@warp == 1))
+	{
+	warp "pvp_y_7-1",221,204;
+	}
+}
+
+-	script	Capture The Flag::CTFclient	108,{
+
+begin:
+
+set @team, 0;
+set @heal, 0;
+
+//gets players hair color, body color, and save point
+set hair, getlook(6);
+set body, getlook(7);
+
+//counts users on map
+set @mapuser, getmapusers ("prt_are01");
+set @hmapuser, getmapusers ("pvp_2vs2");
+set @smapuser, getmapusers ("pvp_y_5-2");
+set @nmapuser, getmapusers ("tha_t10");
+set @gmapuser, getmapusers ("poring_w02");
+set @nnmapuser, getmapusers ("pvp_y_7-1");
+
+getmapxy(originmap$,originx,originy,0,strcharinfo(0));
+
+set @blueteam$, "^0066FFBlue Team^000000";
+set @redteam$, "^FF0000Red Team^000000";
+
+mes "[Capture The Flag]";
+mes "Please select your desired gametype.";
+
+menu "Classic CTF "+@mapuser+"/24",ctfclassic,"Classic GvG CTF "+@gmapuser+"/24",classicgvg,"Hardcore CTF "+@hmapuser+"/24",ctfhardcore,"Single Flag CTF "+@smapuser+"/24",ctfsingle,"Neutral Flag CTF "+@nmapuser+"/24",ctfneutral,"Prontera Neutral Flag "+@nnmapuser+"/24",pronteraneutral,"Your Stats",pstats,"Player Ranks",rank,"Rules",rules,"Cancel",-;
+
+mes "Hope to see you soon.";
+close;
+
+ctfclassic:
+
+next;
+mes "[Classic CTF]";
+
+if ($@redwin == 1 || $@bluewin == 1)
+{
+mes "";
+mes "Please wait a minute while I clean the battlefield.";
+close2;
+
+sleep2 45000;
+
+set $@redwin, 0;
+set $@bluewin, 0;
+end;
+}
+
+//makes player unable to join the game due to full room
+if (@mapuser >= 24)
+{
+goto fullmsgclassic;
+}
+
+if ($@redqt < 0)
+{
+set $@redqt, 0;
+}
+
+if ($@blueqt < 0)
+{
+set $@blueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@redqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@blueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",bt,"Red Team",rt,"Cancel",-;
+close;
+
+bt:
+if ($@blueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "prt_are01", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto okclassic;
+end;
+
+rt:
+if ($@redqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "prt_are01", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto okclassic;
+end;
+
+okclassic:
+
+set @iclassqt, getarraysize($@classic);
+setarray $@classic[@iclassqt], getcharid(3);
+
+set colorchange, 1;
+set @playing, 1;
+set @classic, 1;
+
+if (@team == 2)
+{
+set $@redqt, $@redqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+save "prt_are01",268,150;
+warp "prt_are01",268,150;
+}
+
+if (@team == 1)
+{
+set $@blueqt, $@blueqt +1;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+save "prt_are01",30,150;
+warp "prt_are01",30,150;
+}
+percentheal 100,100;
+close;
+
+fullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@redqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@blueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+end;
+
+M_ctfhardcore:
+next;
+mes "[Hardcore CTF]";
+
+if ($@hredwin == 1 || $@hbluewin == 1)
+{
+mes "";
+mes "Please wait a minute while I clean the battlefield.";
+close2;
+
+sleep2 45000;
+
+set $@hredwin, 0;
+set $@hbluewin, 0;
+end;
+}
+
+//makes player unable to join the game due to full room
+if (@hmapuser >= 24)
+{
+goto hfullmsgclassic;
+}
+
+if ($@hredqt < 0)
+{
+set $@hredqt, 0;
+}
+
+if ($@hblueqt < 0)
+{
+set $@hblueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@hredqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@hblueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",hbt,"Red Team",hrt,"Cancel",-;
+close;
+
+hbt:
+if ($@hblueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "pvp_2vs2", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto okhardcore;
+end;
+
+hrt:
+if ($@hredqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "pvp_2vs2", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto okhardcore;
+end;
+
+okhardcore:
+
+set @ihardqt, getarraysize($@hardcore);
+setarray $@hardcore[@ihardqt], getcharid(3);
+
+set colorchange, 1;
+set @playing, 1;
+set @hardcore, 1;
+
+if (@team == 2)
+{
+set $@rspawn, $@rspawn + 1;
+set $@hredqt, $@hredqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+	if ($@rspawn == 1)
+	{
+	set @rspawn, 1;
+	save "pvp_2vs2",65,47;
+	warp "pvp_2vs2",65,47;
+	}
+
+	if ($@rspawn == 2)
+	{
+	set @rspawn, 2;
+	set $@rspawn, 0;
+	save "pvp_2vs2",65,33;
+	warp "pvp_2vs2",65,33;
+	}
+}
+
+if (@team == 1)
+{
+set $@bspawn, $@bspawn + 1;
+set $@hblueqt, $@hblueqt +1;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+	if ($@bspawn == 1)
+	{
+	set @bspawn, 1;
+	save "pvp_2vs2",14,47;
+	warp "pvp_2vs2",14,47;
+	}
+
+	if ($@bspawn == 2)
+	{
+	set @bspawn, 2;
+	set $@bspawn, 0;
+	save "pvp_2vs2",14,33;
+	warp "pvp_2vs2",14,33;
+	}
+}
+percentheal 100,100;
+close;
+
+hfullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@hredqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@hblueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+
+close;
+
+ctfsingle:
+
+next;
+mes "[Single Flag CTF]";
+
+if ($@sredwin == 1 || $@sbluewin == 1)
+{
+mes "";
+mes "Please wait a minute while I clean the battlefield.";
+close2;
+
+sleep2 45000;
+
+set $@sredwin, 0;
+set $@sbluewin, 0;
+end;
+}
+
+//makes player unable to join the game due to full room
+if (@smapuser >= 24)
+{
+goto sfullmsgclassic;
+}
+
+if ($@sredqt < 0)
+{
+set $@sredqt, 0;
+}
+
+if ($@sblueqt < 0)
+{
+set $@sblueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@sredqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@sblueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",sbt,"Red Team",srt,"Cancel",-;
+close;
+
+sbt:
+if ($@sblueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "pvp_y_5-2", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto oksingle;
+end;
+
+srt:
+if ($@sredqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "pvp_y_5-2", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto oksingle;
+end;
+
+oksingle:
+
+set @isingleqt, getarraysize($@single);
+setarray $@single[@isingleqt], getcharid(3);
+
+if (@smapuser == 0)
+{
+set $@boff, 1;
+set $@roff, 0;
+set $@suddendeath, 0;
+setnpctimer 0, "CTF";
+}
+
+set colorchange, 1;
+set @playing, 1;
+set @single, 1;
+
+if (@team == 2)
+{
+set $@single_rspawn, $@single_rspawn + 1;
+set $@sredqt, $@sredqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+	if ($@single_rspawn == 1)
+	{
+	set @single_rspawn, 1;
+	save "pvp_y_5-2",205,122;
+	warp "pvp_y_5-2",205,122;
+	}
+
+	if ($@single_rspawn == 2)
+	{
+	set @single_rspawn, 2;
+	set $@single_rspawn, 0;
+	save "pvp_y_5-2",205,137;
+	warp "pvp_y_5-2",205,137;
+	}
+}
+
+if (@team == 1)
+{
+set $@single_bspawn, $@single_bspawn + 1;
+set $@sblueqt, $@sblueqt +1;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+	if ($@single_bspawn == 1)
+	{
+	set @single_bspawn, 1;
+	save "pvp_y_5-2",58,137;
+	warp "pvp_y_5-2",58,137;
+	}
+
+	if ($@single_bspawn == 2)
+	{
+	set @single_bspawn, 2;
+	set $@single_bspawn, 0;
+	save "pvp_y_5-2",58,122;
+	warp "pvp_y_5-2",58,122;
+	}
+}
+percentheal 100,100;
+close;
+
+sfullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@sredqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@sblueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+end;
+
+ctfneutral:
+
+next;
+mes "[Neutral Flag CTF]";
+
+if ($@nredwin == 1 || $@nbluewin == 1)
+{
+mes "";
+mes "Please wait a minute while I clean the battlefield.";
+close2;
+
+sleep2 45000;
+
+set $@nredwin, 0;
+set $@nbluewin, 0;
+end;
+}
+
+//makes player unable to join the game due to full room
+if (@nmapuser >= 24)
+{
+goto nfullmsgclassic;
+}
+
+if ($@nredqt < 0)
+{
+set $@nredqt, 0;
+}
+
+if ($@nblueqt < 0)
+{
+set $@nblueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@nredqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@nblueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",nbt,"Red Team",nrt,"Cancel",-;
+close;
+
+nbt:
+if ($@nblueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "tha_t10", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto okneutral;
+end;
+
+nrt:
+if ($@nredqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "tha_t10", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto okneutral;
+end;
+
+okneutral:
+
+set @ineutralqt, getarraysize($@neutral);
+setarray $@neutral[@ineutralqt], getcharid(3);
+
+set colorchange, 1;
+set @playing, 1;
+set @neutral, 1;
+
+if (@team == 2)
+{
+set $@nredqt, $@nredqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+save "tha_t10",90,156;
+warp "tha_t10",90,156;
+}
+
+if (@team == 1)
+{
+set $@nblueqt, $@nblueqt +1;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+save "tha_t10",167,100;
+warp "tha_t10",167,100;
+}
+percentheal 100,100;
+close;
+
+nfullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@nredqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@nblueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+end;
+
+classicgvg:
+
+next;
+mes "[Classic GvG CTF]";
+
+//makes player unable to join the game due to full room
+if (@gmapuser >= 24)
+{
+goto hfullmsgclassic;
+}
+
+if ($@gredqt < 0)
+{
+set $@gredqt, 0;
+}
+
+if ($@gblueqt < 0)
+{
+set $@gblueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@gredqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@gblueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",gbt,"Red Team",grt,"Cancel",-;
+close;
+
+gbt:
+if ($@gblueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "poring_w02", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto okclassicgvg;
+end;
+
+grt:
+if ($@gredqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "poring_w02", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto okclassicgvg;
+end;
+
+okclassicgvg:
+
+set @iclassgvgqt, getarraysize($@classicgvg);
+setarray $@classicgvg[@iclassgvgqt], getcharid(3);
+
+set colorchange, 1;
+set @playing, 1;
+set @classicgvg, 1;
+
+if (@team == 2)
+{
+set $@gredqt, $@gredqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+save "poring_w02",170,176;
+warp "poring_w02",170,176;
+}
+
+if (@team == 1)
+{
+set $@gblueqt, $@gblueqt +1;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+save "poring_w02",26,176;
+warp "poring_w02",26,176;
+}
+percentheal 100,100;
+close;
+
+gfullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@gredqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@gblueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+
+close;
+
+pronteraneutral:
+
+next;
+mes "[Prontera Neutral Flag]";
+
+//makes player unable to join the game due to full room
+if (@nnmapuser >= 24)
+{
+goto nnfullmsgclassic;
+}
+
+if ($@nnredqt < 0)
+{
+set $@nnredqt, 0;
+}
+
+if ($@nnblueqt < 0)
+{
+set $@nnblueqt, 0;
+}
+
+mes "The "+@redteam$+" has "+$@nnredqt+"/12 Players.";
+mes "The "+@blueteam$+" has "+$@nnblueqt+"/12 Players.";
+mes " ";
+mes "What team would you like to join?";
+
+menu "Blue Team",nnbt,"Red Team",nnrt,"Cancel",-;
+close;
+
+nnbt:
+if ($@nnblueqt >= 12)
+	{
+	next;
+	mes "The "+@blueteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "pvp_y_7-1", ""+strcharinfo(0)+" has joined the Blue Team.",0;
+set @team, 1;
+set teamname, @blueteam$;
+goto okpronteraneutral;
+end;
+
+nnrt:
+if ($@nnredqt >= 12)
+	{
+	next;
+	mes "The "+@redteam$+" is full";
+	next;
+	goto begin;
+	}
+
+mapannounce "pvp_y_7-1", ""+strcharinfo(0)+" has joined the Red Team.",0;
+set @team, 2;
+set teamname, @redteam$;
+goto okpronteraneutral;
+end;
+
+okpronteraneutral:
+
+set @ipneutralqt, getarraysize($@pneutral);
+setarray $@pneutral[@ipneutralqt], getcharid(3);
+
+set colorchange, 1;
+set @playing, 1;
+
+if (@team == 2)
+{
+set $@nnredqt, $@nnredqt +1;
+
+//changes character sprite palletes, warps, and saves player to CTF map "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Novice || Class == Job_Swordsman || Class == Job_Archer || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == SuperNovice || Class == Job_Paladin)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Stalker || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,146;
+//		}
+//
+//	if (Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Lord_Knight || Class == Job_Wizard || Class == Job_Bard || Class == Job_Clown || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Taekwon || Class == Job_Star_Gladiator)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_Creator)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Sage)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Professor || Class == Job_Mage)
+//		{
+//		setlook 6,6;
+//		setlook 7,39;
+//		}
+//
+//	if (Class == Job_Whitesmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,62;
+//		}
+//
+//	if (Class == Job_Soul_Linker)
+//		{
+//		setlook 6,6;
+//		setlook 7,122;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Crusader || Class == Job_Merchant)
+//		{
+//		setlook 6,6;
+//		setlook 7,18;
+//		}
+//
+//	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
+//		{
+//		setlook 6,6;
+//		setlook 7,42;
+//		}
+//
+//	if (Class == Job_High_Priest)
+//		{
+//		setlook 6,6;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
+//		{
+//		setlook 6,6;
+//		setlook 7,14;
+//		}
+//
+//	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
+//		{
+//		setlook 6,6;
+//		setlook 7,66;
+//		}
+//
+//	if (Class == Job_Paladin || Class == Job_Blacksmith)
+//		{
+//		setlook 6,6;
+//		setlook 7,58;
+//		}
+//	if (Class == Job_Dancer)
+//		{
+//		setlook 6,6;
+//		setlook 7,153;
+//		}
+//
+//	if (Class == Job_Gypsy)
+//		{
+//		setlook 6,6;
+//		setlook 7,47;
+//		}
+//
+//	if (Class == Job_Stalker)
+//		{
+//		setlook 6,6;
+//		setlook 7,157;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//
+//	if (Class == Job_Gunslinger)
+//		{
+//		setlook 6,6;
+//		setlook 7,26;
+//		}
+//	}
+
+save "pvp_y_7-1",283,204;
+warp "pvp_y_7-1",283,204;
+}
+
+if (@team == 1)
+{
+set $@nnblueqt, $@nnblueqt +1;
+
+// "^^color^^"
+//if (Sex == 1)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross || Class == Job_High_Priest || Class == Job_Champion)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Merchant || Class == Job_Swordsman)
+//		{
+//		setlook 6,5;
+//		setlook 7,2;
+//		}
+//
+//	if (Class == Job_Archer || Class == Job_Mage || Class == Job_Knight || Class == Job_Wizard || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Clown || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	}
+
+//if (Sex == 0)
+//	{
+//	if (Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Priest || Class == Job_Monk || Class == Job_Assassin_Cross)
+//		{
+//		setlook 6,5;
+//		setlook 7,1;
+//		}
+//
+//	if (Class == Job_Archer)
+//		{
+//		setlook 6,5;
+//		setlook 7,0;
+//		}
+//
+//	if (Class == Job_Mage || Class == Job_Knight || Class == Job_Hunter || Class == Job_Crusader || Class == Job_High_Wizard || Class == Job_Sniper || Class == Job_Paladin || Class == Job_Stalker || Class == Job_Gypsy || Class == Job_Taekwon || Class == Job_Ninja || Class == Job_Gunslinger || Class == Job_Star_Gladiator || Class == Job_Blacksmith || Class == Job_Whitesmith || Class == Job_Soul_Linker || Class == Job_High_Priest || Class == Job_Champion || Class == Job_Merchant || Class == Job_Swordsman || Class == Job_Dancer)
+//		{
+//		setlook 6,5;
+//		setlook 7,43;
+//		}
+//	if (Class == Job_Wizard)
+//		{
+//		setlook 6,5;
+//		setlook 7,67;
+//		}
+//	}
+
+save "pvp_y_7-1",29,204;
+warp "pvp_y_7-1",29,204;
+}
+percentheal 100,100;
+close;
+
+nnfullmsgclassic:
+mes "The ^FF0000Red Team^000000 has "+$@nnredqt+"/12 Players.";
+mes "The ^0066FFBlue Team^000000 has "+$@nnblueqt+"/12 Players.";
+mes " ";
+mes "Sorry both teams are full try another CTF arena.";
+close;
+end;
+
+M_rules:
+mes "What do you want to know about?";
+menu "Common Rules",crrules,"Classic CTF",crules,"Hardcore CTF",hrules,"Single Flag CTF",srules,"Back",begin;
+close;
+
+crrules:
+
+next;
+mes "The object of Capture the Flag is to steal the opposing team's flag and returning it to your base while having your flag still at your base.";
+mes "Each gametype plays in a similar way.  The flags will cast agility down on the flag carrier every 5 seconds and will also follow the carriers like pets would (when they have the flag).  Each game of Capture the Flag will end with the first team that achieves 5 flag captures.";
+next;
+menu "Common Rules",crrules,"Classic CTF",crules,"Hardcore CTF",hrules,"Single Flag CTF",srules,"Back",begin;
+close;
+
+crules:
+next;
+mes "Classic CTF is the most basic of Capture the Flag games.  PvP is on and each team must play offense and defense to win.  The flags are both on touch return.";
+menu "Common Rules",crrules,"Classic CTF",crules,"Hardcore CTF",hrules,"Single Flag CTF",srules,"Back",begin;
+close;
+
+hrules:
+next;
+mes "Hardcore CTF is similar to Classic CTF but with some minor tweaks.  GvG is on, each team has to play offensively and defensively, and the flag will silence the flag carrier along with agility down every 5 seconds.  The flags are both on touch return.";
+menu "Common Rules",crrules,"Classic CTF",crules,"Hardcore CTF",hrules,"Single Flag CTF",srules,"Back",begin;
+close;
+
+srules:
+next;
+mes "Single Flag CTF is the most complicated out of the three gametypes.  PvP is on for this gametype.  Instead of having to play offense and defense all at once there are 3 minute rounds where one team is on offense and the other is on defense.  The flags are NOT on touch return in this gametype, instead they are on 30 second respawn times.";
+menu "Common Rules",crrules,"Classic CTF",crules,"Hardcore CTF",hrules,"Single Flag CTF",srules,"Back",begin;
+close;
+
+pstats:
+
+set #kdr, #kills - #death;
+set @kdr, kills - death;
+set #rate, ( ((#win * 25) - (#lose *25)) + ((#kills * 4) - (#death *4)) + (#spree * 10) + (#fcapt * 5) + (#ftaken - #fdrop) + (#freturn * 3) );
+set rate, ( ((win * 25) - (lose *25)) + ((kills * 4) - (death * 4)) + (spree * 10) + (fcapt * 5) + (ftaken - fdrop) + (freturn * 3) );
+
+next;
+mes "Wins: "+win+"";
+mes "Loses: "+lose+"";
+mes " ";
+mes "Kills: "+kills+"";
+mes "Deaths: "+death+"";
+mes "Kill/Death Ratio: "+@kdr+"";
+mes "Best Killing Spree: "+spree+"";
+mes " ";
+mes "Flags Captured: "+fcapt+"";
+mes "Flags Returned: "+freturn+"";
+mes "Flags Taken: "+ftaken+"";
+mes "Flags Dropped: "+fdrop+"" ;
+mes " ";
+//mes "Rank: n/a";
+mes "Overall Rating: "+rate+"";
+mes "CTF POINTS: "+ctfpt+"";
+mes " ";
+mes "TOTAL CTF POINTS GAINED: "+tctfpt+"";
+
+close;
+end;
+
+astat:
+
+next;
+mes "Wins: "+#win+"";
+mes "Loses: "+#lose+"";
+mes " ";
+mes "Kills: "+#kills+"";
+mes "Deaths: "+#death+"";
+mes "Kill/Death Ratio: "+#kdr+"";
+mes "Best Killing Spree: "+#spree+"";
+mes " ";
+mes "Flags Captured: "+#fcapt+"";
+mes "Flags Returned: "+#freturn+"";
+mes "Flags Taken: "+#ftaken+"";
+mes "Flags Dropped: "+#fdrop+"" ;
+mes " ";
+//mes "Rank: n/a";
+mes "Overall Rating: "+#rate+"";
+
+close;
+end;
+
+rank:
+mes "Not Implemented yet.";
+close;
+
+  end;
+  }
+}
+}
+
+// ================== Duplicates ========================
+//prt_are01,29,150,5	duplicate(blue_ctf_healer)	Healer	829
+//prt_are01,270,150,4	duplicate(red_ctf_healer)	Healer	829
+//pvp_2vs2,14,39,5	duplicate(blue_ctf_healer)	Healer	829
+//pvp_2vs2,65,39,4	duplicate(red_ctf_healer)	Healer	829
+//pvp_y_5-2,46,130,5	duplicate(blue_ctf_healer)	Healer	829
+//pvp_y_5-2,213,130,4	duplicate(red_ctf_healer)	Healer	829
+//tha_t10,196,355,4	duplicate(blue_ctf_healer)	Healer	829
+//tha_t10,208,16,4	duplicate(red_ctf_healer)	Healer	829
+//poring_w02,23,183,5	duplicate(blue_ctf_healer)	Healer	829
+//poring_w02,167,183,4	duplicate(red_ctf_healer)	Healer	829
+//pvp_y_7-1,29,211,4	duplicate(blue_ctf_healer)	Healer	829
+//pvp_y_7-1,282,211,4	duplicate(red_ctf_healer)	Healer	829
+prt_are01,28,164,5	duplicate(escape_npc)	Leave CTF	780
+prt_are01,271,164,4	duplicate(escape_npc)	Leave CTF#1	780
+pvp_2vs2,9,39,5	duplicate(escape_npc)	Leave CTF#2  780
+pvp_2vs2,70,39,4	duplicate(escape_npc)	Leave CTF#3  780
+pvp_y_5-2,44,140,5	duplicate(escape_npc)	Leave CTF#4  780
+pvp_y_5-2,213,144,4	duplicate(escape_npc)	Leave CTF#5	780
+tha_t10,167,101,4	duplicate(escape_npc)	Leave CTF#6  780
+tha_t10,90,159,4	duplicate(escape_npc)	Leave CTF#7  780
+poring_w02,29,183,5	duplicate(escape_npc)	Leave CTF#8  780
+poring_w02,173,183,4	duplicate(escape_npc)	Leave CTF#9  780
+pvp_y_7-1,33,211,4	duplicate(escape_npc)	Leave CTF#10  780
+pvp_y_7-1,277,211,4	duplicate(escape_npc)	Leave CTF#11  780
+prt_are01,28,136,5	duplicate(Grendal)	Repair NPC	813
+prt_are01,271,136,4	duplicate(Grendal)	Repair NPC#1	813
+pvp_2vs2,7,39,5	duplicate(Grendal)	Repair NPC#2  813
+pvp_2vs2,72,39,4	duplicate(Grendal)	Repair NPC#3  813
+pvp_y_5-2,44,135,5	duplicate(Grendal)	Repair NPC#4  813
+pvp_y_5-2,213,123,4	duplicate(Grendal)	Repair NPC#5	813
+tha_t10,90,163,4	duplicate(Grendal)	Repair NPC#6	813
+tha_t10,167,105,4	duplicate(Grendal)	Repair NPC#7  813
+poring_w02,26,183,5	duplicate(Grendal)	Repair NPC#8  813
+poring_w02,170,183,4	duplicate(Grendal)	Repair NPC#9  813
+pvp_y_7-1,31,211,4	duplicate(Grendal)	Repair NPC #10  813
+pvp_y_7-1,279,211,4	duplicate(Grendal)	Repair NPC#11	813
+poring_w02,19,176,4	duplicate(left_warper)	Left Warp	836
+poring_w02,163,176,4	duplicate(left_warper)	Left Warp#1  836
+poring_w02,32,176,8	duplicate(right_warper)	Right Warp	836
+poring_w02,176,176,8	duplicate(right_warper)	Right Warp#1  836
+pvp_y_7-1,272,211,4	duplicate(red_warper)	Blue Base Gate	723¦2
+pvp_y_7-1,40,211,4	duplicate(blue_warper)	Red Base Gate	723¦2
+morocc,160,97,6	duplicate(CTFclient)	Capture The Flag	108
+geffen,112,64,6	duplicate(CTFclient)	Capture The Flag#1  108
+payon,179,104,6	duplicate(CTFclient)	Capture The Flag#2	108
+alberta,115,63,6	duplicate(CTFclient)	Capture The Flag#3  108
+izlude,127,118,6	duplicate(CTFclient)	Capture The Flag#4  108
+aldebaran,145,119,6	duplicate(CTFclient)	Capture The Flag #5  108
+comodo,202,150,6	duplicate(CTFclient)	Capture The Flag#6	108
+yuno,151,183,6	duplicate(CTFclient)	Capture The Flag#7  108
+amatsu,105,149,6	duplicate(CTFclient)	Capture The Flag#8	108
+gonryun,156,122,6	duplicate(CTFclient)	Capture The Flag#9  108
+umbala,126,136,6	duplicate(CTFclient)	Capture The Flag#10  108
+louyang,213,104,6	duplicate(CTFclient)	Capture The Flag#11	108
+ayothaya,212,174,6	duplicate(CTFclient)	Capture The Flag#12  108
+einbroch,245,205,6	duplicate(CTFclient)	Capture The Flag#13  108
+lighthalzen,167,102,6	duplicate(CTFclient)	Capture The Flag#14	108
+hugel,109,75,6	duplicate(CTFclient)	Capture The Flag#15  108
+rachel,112,141,6	duplicate(CTFclient)	Capture The Flag#16	108
+veins,211,129,6	duplicate(CTFclient)	Capture The Flag#17  108

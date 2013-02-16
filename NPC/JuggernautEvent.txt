@@ -1,0 +1,860 @@
+//===== rAthena Script =======================================
+//= Juggernaut Event
+//===== Template By: =========================================
+//= Ace
+//===== Script Overhaul By: ==================================
+//= Mysterious
+//===== Current Version: =====================================
+//= 1.6
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: =========================================
+//= A player will be selected to be the "Juggernaut" while the rest of the players
+//= have to all team together to take that Juggernaut down and be awarded.
+//===== TODO: ================================================
+// - Revise whole script
+//===== Additional Comments: =================================
+//= v1.0 - First release [Ace]
+//= v1.1 - Fixed Credits [Mysterious]
+//= v1.2 - Fixed some sentences [Mysterious]
+//= v1.3 - Removed unnecessary things [Mysterious]
+//= v1.4 - Fixed Duplicates [Mysterious]
+//= v1.5 - Moved Mapflags [Mysterious]
+//= v1.6 - Cleaning [Mysterious]
+//============================================================
+prontera,163,195,4	script	Juggernaut	810,{
+
+// === Staff Menu
+if (getgmlevel() == 99) { // Change '99' to your desired level
+  mes "[ Juggernaut ]";
+  mes "You can choose to enable/disable and/or warp out players. Status:";
+  if (.offline) {
+    mes "^E00000OFFLINE^000000";
+  } else {
+    mes "^00A000ONLINE^000000";
+  }
+  menu "Continue",-,"Enable/Disable",-,"Warp Out",-,"Both",-;
+  set @sel, @menu-1;
+  if(@sel&1) set .offline, .offline^1;
+  if(@sel&2) {
+    getmapxy(@mapname$, @mapx, @mapy, 0, strcharinfo(0));
+    mapwarp "pvp_n_1-3", @mapname$, @mapx, @mapy;
+  }
+}
+
+// Player view
+if (.offline) {
+  mes "[ The Juggernaut ]";
+  mes "Sorry, but I'm disabled at the moment.";
+  close;
+}
+//-------------------------------------------------------------------------- End
+
+set @jugguser, getmapusers ("pvp_n_1-3");
+set @jugkill, 0;
+
+getmapxy(#originmap$,#originx,#originy,0,strcharinfo(0));
+
+if (@jugguser == 0)
+	{
+	set _juggernaut$, "-";
+	set $@juggtaken, 0;
+	movenpc "The Juggernaut",99,101;
+	}
+
+if ($@juggend == 1)
+	{
+	mes "[ The Juggernaut ]";
+	mes "Welcome to the Juggernaut.";
+	mes "";
+	mes "A game just ended please try again in 5 seconds.";
+	close;
+	end;
+	}
+
+mes "[The Juggernaut]";
+mes "Welcome to the Juggernaut.";
+mes "";
+mes "There are "+@jugguser+" players currently in the game.";
+mes "";
+mes "Would you like to join?";
+menu "- Yes",M_Yes,"- No",-;
+next;
+mes "[ The Juggernaut ]";
+mes "Please come back when you like.";
+close;
+
+M_Yes:
+set @ijugg, getarraysize($@juggernaut);
+setarray $@juggernaut[@ijugg], getcharid(3);
+
+set $@spawn, $@spawn + 1;
+
+if ($@spawn == 1) {
+warp "pvp_n_1-3",99,58;
+save "pvp_n_1-3",99,58;
+}
+
+if ($@spawn == 2) {
+warp "pvp_n_1-3",60,100;
+save "pvp_n_1-3",60,100;
+}
+
+if ($@spawn == 3) {
+warp "pvp_n_1-3",100,138;
+save "pvp_n_1-3",100,138;
+}
+
+if ($@spawn == 4) {
+warp "pvp_n_1-3",140,99;
+save "pvp_n_1-3",140,99;
+}
+
+if ($@spawn == 5) {
+warp "pvp_n_1-3",111,110;
+save "pvp_n_1-3",111,110;
+}
+
+if ($@spawn == 6) {
+warp "pvp_n_1-3",112,88;
+save "pvp_n_1-3",112,88;
+}
+
+if ($@spawn == 7) {
+warp "pvp_n_1-3",87,88;
+save "pvp_n_1-3",87,88;
+}
+
+if ($@spawn == 8) {
+warp "pvp_n_1-3",87,113;
+save "pvp_n_1-3",87,113;
+set $@spawn, 0;
+}
+percentheal 100,100;
+end;
+
+OnPCDieEvent:
+getmapxy(@checkmap$,@checkx,@checky,0);
+if (@checkmap$ == "pvp_n_1-3")
+{
+set $@pd, playerattached();
+set @heal, 0;
+
+	if (_juggernaut$ == strcharinfo(0))
+	{
+	set _juggernaut$, "-";
+	set #juggdeath, #juggdeath + 1;
+	mapannounce "pvp_n_1-3", "The Juggernaut has fallen!",0;
+	}
+
+	set #nonjuggdeath, nonjuggdeath + 1;
+
+sleep2 1000;
+set @newsave, rand(1,5);
+
+if (@newsave == 1)
+	{
+	set @savex, rand(53,96);
+	set @savey, rand(97,102);
+	warp "pvp_n_1-3", (@savex), (@savey);
+	}
+
+if (@newsave == 2)
+	{
+	set @savex, rand(97,102);
+	set @savey, rand(101,144);
+	warp "pvp_n_1-3", (@savex), (@savey);
+	}
+
+if (@newsave == 3)
+	{
+	set @savex, rand(102,152);
+	set @savey, rand(97,102);
+	warp "pvp_n_1-3", (@savex), (@savey);
+	}
+
+if (@newsave == 4)
+	{
+	set @savex, rand(97,102);
+	set @savey, rand(55,95);
+	warp "pvp_n_1-3", (@savex), (@savey);
+	}
+if (@newsave == 5)
+	{
+	set @savex, rand(83,112);
+	set @savey, rand(83,89);
+	warp "pvp_n_1-3", (@savex), (@savey);
+	}
+
+if ($@juggend == 1)
+	{
+	warp #originmap$, (#originx), (#originy);
+	end;
+	}
+
+atcommand "@alive";
+sleep2 500;
+percentheal 100,100;
+}
+
+end;
+
+OnPCLogoutEvent:
+getmapxy(@checkmap$,@checkx,@checky,0);
+if (@checkmap$ == "pvp_n_1-3")
+{
+save #originmap$, (#originx), (#originy);
+
+	if (_juggernaut$ == strcharinfo(0))
+	{
+	set _juggernaut$, "-";
+	set $@juggtaken, 0;
+	mapannounce "pvp_n_1-3", "The Juggernaut has left the game.",0;
+	}
+warp #originmap$, (#originx), (#originy);
+
+set @jmapuser, getmapusers ("pvp_n_1-3");
+if (@jmapuser == 1)
+	{
+	set _juggernaut$, "-";
+	set $@juggtaken, 0;
+	movenpc "The Juggernaut",99,101;
+	}
+
+for (set @i, 0; @i < getarraysize($@juggernaut); set @i, @i+1) {
+	if ($@juggernaut[@i] == getcharid(3))
+		{
+		setarray $@juggernaut[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@juggernaut); set @i, @i+1) {
+	setarray $@juggernaut[@i], $@juggernaut[@i+1];
+}
+
+end;
+}
+end;
+
+OnEventGameOverJugg:
+set .@ijugg, getarraysize($@juggernaut);
+set .@jugg, 0;
+
+juggend:
+if (.@jugg < .@ijugg)
+	{
+	attachrid $@juggernaut[.@jugg];
+
+	getmapxy(@checkmap$,@checkx,@checky,0);
+	if (@checkmap$ == "pvp_n_1-3")
+		{
+		save #originmap$, (#originx), (#originy);
+		warp #originmap$, (#originx), (#originy);
+		}
+
+	detachrid;
+	set .@jugg, .@jugg + 1;
+	goto juggend;
+	}
+
+for (set .@j, 0; .@j < getarraysize($@juggernaut); set .@j, .@j+1) {
+	setarray $@juggernaut[.@j], 0;
+}
+
+sleep2 5000;
+set $@juggend, 0;
+set $@juggtaken, 0;
+movenpc "The Juggernaut",99,101;
+end;
+}
+
+pvp_n_1-3,99,101,4	script	The Juggernaut	1198,{
+
+npcspeed 100;
+
+if ($@juggtaken == 0)
+{
+OnJuggChangeEvent:
+set $@changejugg, 0;
+set $@juggtaken, 1;
+set $@juggbuff, 9;
+set @jugglink, 0;
+set _juggernaut$, strcharinfo(0);
+announce ""+_juggernaut$+" is the Juggernaut!#@?%@?",bc_map;
+set $@ltarget, getCharID(3);
+
+	if(Class == Job_Alchem || Class == Job_Creator) {
+	set $@job, 1;
+	unitskilluseid $@ltarget,445,5;
+	}
+
+	if(Class == Job_Monk || Class == Job_Champion) {
+	set $@job, 2;
+	unitskilluseid $@ltarget,447,5;
+	}
+
+	if(Class == Job_Sage || Class == Job_Professor) {
+	set $@job, 3;
+	unitskilluseid $@ltarget,449,5;
+	}
+
+	if(Class == Job_Crusader || Class == Job_Paladin) {
+	set $@job, 4;
+	unitskilluseid $@ltarget,450,5;
+	}
+
+	if(Class == Job_SuperNovice) {
+	set $@job, 5;
+	unitskilluseid $@ltarget,451,5;
+	}
+
+	if(Class == Job_Knight || Class == Job_Lord_Knight) {
+	set $@job, 6;
+	unitskilluseid $@ltarget,452,5;
+	}
+
+	if(Class == Job_Wizard || Class == Job_High_Wizard) {
+	set $@job, 7;
+	unitskilluseid getcharid(3),453,5;
+	}
+
+	if(Class == Job_Priest || Class == Job_High_Priest) {
+	set $@job, 8;
+	unitskilluseid $@ltarget,454,5;
+	}
+
+	if(Class == Job_Bard || Class == Job_Clown || Class == Job_Dancer || Class == Job_Gypsy) {
+	set $@job, 9;
+	unitskilluseid $@ltarget,455,5;
+	}
+
+	if(Class == Job_Rogue || Class == Job_Stalker) {
+	set $@job, 10;
+	unitskilluseid $@ltarget,456,5;
+	}
+
+	if(Class == Job_Assassin || Class == Job_Assassin_Cross) {
+	set $@job, 11;
+	unitskilluseid $@ltarget,457,5;
+	}
+
+	if(Class == Job_Blacksmith || Class == Job_Whitesmith) {
+	set $@job, 12;
+	unitskilluseid $@ltarget,458,5;
+	}
+
+	if(Class == Job_Hunter || Class == Job_Sniper) {
+	set $@job, 13;
+	unitskilluseid $@ltarget,460,5;
+	}
+
+	if(Class == Job_Soul_Linker) {
+	set $@job, 14;
+	unitskilluseid $@ltarget,461,5;
+	}
+
+	if(Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Star_Gladiator2) {
+	set $@job, 15;
+	unitskilluseid $@ltarget,448,5;
+	}
+
+set @juggbuff, 9;
+goto juggfollow;
+}
+
+if (@novalue == 503)
+{
+juggfollow:
+if (strcharinfo(0) == _juggernaut$)
+{
+getmapxy(@mapname$,@juggernautx,@juggernauty,0,_juggernaut$);
+npcwalkto (@juggernautx + 2), (@juggernauty + 2);
+
+if (strcharinfo(0) == _juggernaut$)
+{
+set @juggbuff, @juggbuff + 1;
+set $@jugglink, $@jugglink + 1;
+percentheal 2,3;
+
+	if (@juggbuff == 10)
+	{
+		if ($@job == 1)
+		{
+		sc_start SC_BLESSING,11000,30;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,10;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 2)
+		{
+		sc_start SC_BLESSING,11000,40;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,10;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 3)
+		{
+		sc_start SC_BLESSING,11000,50;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,20;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 4)
+		{
+		sc_start SC_BLESSING,11000,50;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,10;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 5)
+		{
+		sc_start SC_BLESSING,11000,50;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,30;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 6)
+		{
+		sc_start SC_BLESSING,11000,40;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,40;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 7)
+		{
+		sc_start SC_BLESSING,11000,50;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,10;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 8)
+		{
+		sc_start SC_BLESSING,11000,50;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,10;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 9)
+		{
+		sc_start SC_BLESSING,11000,40;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,20;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 10)
+		{
+		sc_start SC_BLESSING,11000,44;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,20;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 11)
+		{
+		sc_start SC_BLESSING,11000,40;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,10;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 12)
+		{
+		sc_start SC_BLESSING,11000,40;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,40;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 13)
+		{
+		sc_start SC_BLESSING,11000,40;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,40;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 14)
+		{
+		sc_start SC_BLESSING,11000,100;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,10;
+		skilleffect 29,0;
+		}
+
+		if ($@job == 15)
+		{
+		sc_start SC_BLESSING,11000,40;
+		skilleffect 34,0;
+
+		sc_start SC_INCREASEAGI,11000,20;
+		skilleffect 29,0;
+		}
+
+	sc_start SC_IMPOSITIO,11000,10;
+	skilleffect 66,0;
+
+	sc_start SC_SUFFRAGIUM,11000,10;
+	skilleffect 67,0;
+
+	sc_start SC_ADRENALINE2,11000,5;
+
+	sc_start SC_WEAPONPERFECTION,11000,5;
+
+	sc_start SC_OVERTHRUST,11000,5;
+
+	sc_start SC_MAXIMIZEPOWER,11000,5;
+
+	sc_start SC_ASSUMPTIO,11000,5;
+	skilleffect 361,0;
+
+	set @juggbuff, 0;
+	}
+
+	if ($@jugglink == 20)
+	{
+
+		if(Class == Job_Alchem || Class == Job_Creator) {
+		unitskilluseid $@ltarget,445,5;
+		}
+
+		if(Class == Job_Monk || Class == Job_Champion) {
+		unitskilluseid $@ltarget,447,5;
+		}
+
+		if(Class == Job_Sage || Class == Job_Professor) {
+		unitskilluseid $@ltarget,449,5;
+		}
+
+		if(Class == Job_Crusader || Class == Job_Paladin) {
+		unitskilluseid $@ltarget,450,5;
+		}
+
+		if(Class == Job_SuperNovice) {
+		unitskilluseid $@ltarget,451,5;
+		}
+
+		if(Class == Job_Knight || Class == Job_Lord_Knight) {
+		unitskilluseid $@ltarget,452,5;
+		}
+	
+		if(Class == Job_Wizard || Class == Job_High_Wizard) {
+		unitskilluseid getcharid(3),453,5;
+		}
+
+		if(Class == Job_Priest || Class == Job_High_Priest) {
+		unitskilluseid $@ltarget,454,5;
+		}
+
+		if(Class == Job_Bard || Class == Job_Clown || Class == Job_Dancer || Class == Job_Gypsy) {
+		unitskilluseid $@ltarget,455,5;
+		}
+
+		if(Class == Job_Rogue || Class == Job_Stalker) {
+		unitskilluseid $@ltarget,456,5;
+		}
+
+		if(Class == Job_Assassin || Class == Job_Assassin_Cross) {
+		unitskilluseid $@ltarget,457,5;
+		}
+
+		if(Class == Job_Blacksmith || Class == Job_Whitesmith) {
+		unitskilluseid $@ltarget,458,5;
+		}
+
+		if(Class == Job_Hunter || Class == Job_Sniper) {
+		unitskilluseid $@ltarget,460,5;
+		}
+
+		if(Class == Job_Soul_Linker) {
+		unitskilluseid $@ltarget,461,5;
+		}
+
+		if(Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Star_Gladiator2) {
+		unitskilluseid $@ltarget,448,5;
+		}
+	set $@jugglink, 0;
+	}
+
+if (strcharinfo(0) != _juggernaut$)
+	{
+	end;
+	}
+
+}
+sleep2 1000;
+goto juggfollow;
+}
+}
+end;
+
+OnPCKillEvent:
+
+getmapxy(@checkmap$,@checkx,@checky,0);
+if (@checkmap$ == "pvp_n_1-3")
+{
+set $@pk, playerattached();
+
+	if (_juggernaut$ == strcharinfo(0))
+	{
+	set @jugkill, @jugkill + 1;
+	set #jugkill, #jugkill +1;
+	set @towin, 20 - @jugkill;
+
+		if (@towin == 0)
+		{
+		set $@juggend, 1;
+		set $@juggtaken, 0;
+		set @jugkill, 0;
+		mapannounce "pvp_n_1-3", "Juggernaut: "+_juggernaut$+" has won the game!",0;
+		set _juggernaut$, "-";
+
+		donpcevent "Juggernaut::OnEventGameOverJugg";
+
+		//mapwarp "pvp_n_1-3", #originmap$, (#originx), (#originy);
+		end;
+		}
+	mapannounce "pvp_n_1-3", "The Juggernaut, "+_juggernaut$+" needs "+@towin+" kills to win.",0;
+	}
+ 
+	if (_juggernaut$ != strcharinfo(0))
+	{
+	set #nonjuggkill, #nonjuggkill + 1;
+	}
+
+	if ($@pd == $@ltarget)
+	{
+	goto OnJuggChangeEvent;
+	}
+}
+end;
+
+}
+
+-	script	healer::jugg_healer	829,{
+
+if (@heal == 0)
+	{
+	percentheal 100,100;
+	set @heal, 1;
+	}
+
+
+	if(Class == Job_Priest || Class == Job_High_Priest) {
+	unitskilluseid getCharID(3),454,5;
+	}
+}
+
+-	script	leave_jugg::escape_jugg	780,{
+
+mes "[ The Juggernaut ]";
+mes "Would you like to leave the Juggernaut event?";
+
+menu "No",M_No,"Yes",M_Yes;
+
+M_Yes:
+save #originmap$, (#originx), (#originy);
+
+if (_juggernaut$ == strcharinfo(0))
+{
+set _juggernaut$, "-";
+set $@juggtaken, 0;
+mapannounce "pvp_n_1-3", "The Juggernaut has left the game.",0;
+atcommand "@die";
+sleep2 500;
+atcommand "@alive";
+percentheal 100,100;
+}
+
+set @jmapuser, getmapusers ("pvp_n_1-3");
+if (@jmapuser == 1)
+	{
+	set _juggernaut$, "-";
+	set $@juggtaken, 0;
+	movenpc "The Juggernaut",99,101;
+	}
+
+for (set @i, 0; @i < getarraysize($@juggernaut); set @i, @i+1) {
+	if ($@juggernaut[@i] == getcharid(3))
+		{
+		setarray $@juggernaut[@i],0;
+		break;
+		}
+}
+for (; @i < getarraysize($@juggernaut); set @i, @i+1) {
+	setarray $@juggernaut[@i], $@juggernaut[@i+1];
+}
+
+warp #originmap$, (#originx), (#originy);
+end;
+
+M_No:
+mes "[ The Juggernaut ]";
+mes "Ok, carry on.";
+close;
+}
+
+-	script	Juggernaut_client	810,{
+
+//Alba's disabler --------------------------------------------------------------
+// GM level 99 menu.
+if (getgmlevel() == 99) {
+  mes "[Juggernaut GM Setup]";
+  mes "You can choose to enable/disable and/or warp out players. Status:";
+  if (.offline) {
+    mes "^E00000OFFLINE^000000";
+  } else {
+    mes "^00A000ONLINE^000000";
+  }
+  menu "Continue",-,"Enable/Disable",-,"Warp Out",-,"Both",-;
+  set @sel, @menu-1;
+  if(@sel&1) set .offline, .offline^1;
+  if(@sel&2) {
+    getmapxy(@mapname$, @mapx, @mapy, 0, strcharinfo(0));
+    mapwarp "pvp_n_1-3", @mapname$, @mapx, @mapy;
+  }
+}
+
+// If the NPC is offline, close.
+if (.offline) {
+  mes "[The Juggernaut]";
+  mes "Sorry, but I'm disabled at the moment.";
+  close;
+}
+//-------------------------------------------------------------------------- End
+
+set @jugguser, getmapusers ("pvp_n_1-3");
+set @jugkill, 0;
+
+getmapxy(#originmap$,#originx,#originy,0,strcharinfo(0));
+
+if (@jugguser == 0)
+	{
+	set _juggernaut$, "-";
+	set $@juggtaken, 0;
+	movenpc "The Juggernaut",99,101;
+	}
+
+if ($@juggend == 1)
+	{
+	mes "[The Juggernaut]";
+	mes "Welcome to the Juggernaut.";
+	mes "";
+	mes "A game just ended please try again in 5 seconds.";
+	close;
+	end;
+	}
+
+mes "[The Juggernaut]";
+mes "Welcome to the Juggernaut.";
+mes "";
+mes "There are "+@jugguser+" players currently in the game.";
+mes "";
+mes "Would you like to join?";
+menu "Yes",yes,"No",-;
+
+mes " ";
+mes "Come back when you get some balls!";
+close;
+
+yes:
+
+set @ijugg, getarraysize($@juggernaut);
+setarray $@juggernaut[@ijugg], getcharid(3);
+
+set $@spawn, $@spawn + 1;
+
+if ($@spawn == 1) {
+warp "pvp_n_1-3",99,58;
+save "pvp_n_1-3",99,58;
+}
+
+if ($@spawn == 2) {
+warp "pvp_n_1-3",60,100;
+save "pvp_n_1-3",60,100;
+}
+
+if ($@spawn == 3) {
+warp "pvp_n_1-3",100,138;
+save "pvp_n_1-3",100,138;
+}
+
+if ($@spawn == 4) {
+warp "pvp_n_1-3",140,99;
+save "pvp_n_1-3",140,99;
+}
+
+if ($@spawn == 5) {
+warp "pvp_n_1-3",111,110;
+save "pvp_n_1-3",111,110;
+}
+
+if ($@spawn == 6) {
+warp "pvp_n_1-3",112,88;
+save "pvp_n_1-3",112,88;
+}
+
+if ($@spawn == 7) {
+warp "pvp_n_1-3",87,88;
+save "pvp_n_1-3",87,88;
+}
+
+if ($@spawn == 8) {
+warp "pvp_n_1-3",87,113;
+save "pvp_n_1-3",87,113;
+set $@spawn, 0;
+}
+percentheal 100,100;
+end;
+}
+
+// ====== Mapflags
+pvp_n_1-3	mapflag	nomemo
+pvp_n_1-3	mapflag	noreturn
+pvp_n_1-3	mapflag	restricted	6
+
+// ====== Duplicates
+//pvp_n_1-3,116,83,5	duplicate(jugg_healer)	Healer#1	829
+//pvp_n_1-3,115,116,5	duplicate(jugg_healer)	Healer#2  829
+//pvp_n_1-3,138,108,5	duplicate(jugg_healer)	Healer#3  829
+//pvp_n_1-3,100,146,5	duplicate(jugg_healer)	Healer#4	829
+//pvp_n_1-3,83,116,5	duplicate(jugg_healer)	Healer#5	829
+//pvp_n_1-3,60,106,5	duplicate(jugg_healer)	Healer#6	829
+//pvp_n_1-3,83,83,5	duplicate(jugg_healer)	Healer#7	829
+//pvp_n_1-3,100,52,5	duplicate(jugg_healer)	Healer#8	829
+pvp_n_1-3,103,52,5	duplicate(escape_jugg)	Leave Game#1	780
+pvp_n_1-3,140,92,5	duplicate(escape_jugg)	Leave Game#2	780
+pvp_n_1-3,96,140,5	duplicate(escape_jugg)	Leave Game#3  780
+pvp_n_1-3,59,92,5	duplicate(escape_jugg)	Leave Game#4	780
+pvp_n_1-3,53,98,4	duplicate(Grendal)	Repair NPC#1	813
+pvp_n_1-3,93,59,4	duplicate(Grendal)	Repair NPC#2	813
+pvp_n_1-3,147,99,4	duplicate(Grendal)	Repair NPC#3  813
+pvp_n_1-3,107,138,4	duplicate(Grendal)	Repair NPC #4  813
+// Main Warper
+morocc,164,97,4	duplicate(Juggernaut_client)	Juggernaut#1  810
+geffen,128,62,4	duplicate(Juggernaut_client)	Juggernaut#2  810
+payon,175,107,4	duplicate(Juggernaut_client)	Juggernaut#3  810
+alberta,122,58,4	duplicate(Juggernaut_client)	Juggernaut#4  810
+izlude,131,120,4	duplicate(Juggernaut_client)	Juggernaut#5  810

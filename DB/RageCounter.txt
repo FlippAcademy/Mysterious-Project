@@ -1,0 +1,26 @@
+//===== rAthena Script =======================================
+//= Rage Counter
+//===== Template By: =========================================
+//= JesusHong
+//===== Modified By: =========================================
+//= Mysterious
+//===== Current Version: ===================================== 
+//= 1.1
+//===== Compatible With: ===================================== 
+//= eAthena or rAthena SVN 
+//===== Description: ========================================= 
+//= Upon each attack, there is a 5% chance to proc for 1 addition Blood Fervor counter.
+//= Each Blood Fervor counter increases your attack by 10%.
+//= The buff will stack additively up to a maximum of 5 Blood Fervor counters.
+//= If you fail to proc Blood Fervor again within 5 seconds of the last proc, your Blood Fervor counter resets to 0.
+//===== Additional Comments: =================================
+//= v1.0 - First release [JesusHong]
+//= v1.1 - Fixed few things [Mysterious]
+//============================================================
+
+//============== Explanation ==================
+// You will want to copy the code below and add it to a items effect bracket.
+autobonus "{ set rageCounter,rageCounter+1; if(rageCounter > 4 )set rageCounter, 5; bonus bAtkRate,rageCounter*10;  message strcharinfo(0), disp$+rageCounter; }",500,5000,0,"{  if(counterReset < gettime(1))set rageCounter,0; misceffect 653; misceffect 376; set counterReset,gettime(1)+5;  }"; },{ set rageCounter,0; set disp$, "Rage Counter: ";
+
+//============== Example =============
+<ID>,<ITEM>,<ITEM>,5,1000,500,20,,0,,,0xFFFFFFFF,31,2,1,,1,0,1190,{ bonus bAllStats,5; autobonus "{ set rageCounter,rageCounter+1; if(rageCounter > 4 )set rageCounter, 5; bonus bAtkRate,rageCounter*10;  message strcharinfo(0), disp$+rageCounter; }",500,5000,0,"{  if(counterReset < gettime(1))set rageCounter,0; misceffect 653; misceffect 376; set counterReset,gettime(1)+5;  }"; },{ set rageCounter,0; set disp$, "Rage Counter: ";},{ }

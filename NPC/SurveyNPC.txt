@@ -1,0 +1,212 @@
+//===== rAthena Script =======================================
+//= Survey NPC
+//===== By: ==================================================
+//= Zafer
+//===== Modified By: =========================================
+// = Mysterious
+//===== Current Version: =====================================
+//= 1.6
+//===== Compatible With: =====================================
+//= rAthena SVN 
+//===== Description: =========================================
+//= Allow players to vote on a question through a Survey.
+//===== Other Information: ===================================
+// Gamemasters can create topics/questions while players are
+// able to vote on such a question/topic. 
+//===== Additional Comments: =================================
+//= v1.0 - Intitial Re-release [Mysterious]
+//= v1.1 - Language structures [Mysterious]
+//= v1.2 - Added divisions [Mysterious]
+//= v1.3 - Added proper information [Mysterious]
+//= v1.4 - Structured the script better [Mysterious]
+//= v1.5 - Fixed German wordings? [Mysterious]
+//= v1.6 - Cleaning [Mysterious]
+//============================================================
+prontera,158,168,5	script	Survey	435,{
+
+set @np$,"[ ^7401DFSandra^000000 ]";
+if ( getgmlevel() == 99 ) {
+if ( $survey_running ) {
+switch ( select ( "- Survey Result","- Delete Survey" ) ) {
+
+        case 1:
+			mes "- ^8A0808"+$survey_title$+"^000000 -";
+			mes $survey_question$;
+			mes "";
+			for ( set @a,0; @a < getarraysize($survey_option$); set @a,@a+1 ) {
+			mes "^0404B4"+$survey_option$[@a]+"^000000 - ^8A0808"+$survey_option_votes[@a]+"^000000 Vote/s";
+			}
+			close;
+         case 2:
+                mes @np$;
+                mes "Are you sure that you want to delete the survey: ";
+                mes "";
+                mes "- ^8A0808"+$survey_title$+"^000000 -";
+                next;
+                if ( select ( "- No","- Yes, pretty sure" ) == 1 ) { close; }
+                set $survey_running,0;
+				set $survey_title$,"^8A0808NOT SET^000000"; 
+				set $survey_question$,"";
+				set @question_set$,"^8A0808NOT SET^000000";
+				for ( set @b,0; @b <= getarraysize($survey_option$)+2; set @b,@b+1 ) {
+				set $survey_option$[@b],"";
+				set $survey_option_votes[@b],0;
+				}
+                mes @np$;
+                mes "The survey has been deleted successfully.";
+                close;
+                }
+                
+		} // Ending bracket to Survey running
+
+		if ( select ( "- Exit","- Create Survey" ) == 1 ) { close; }
+		set $survey_title$,"^8A0808NOT SET^000000"; 
+		set $survey_question$,"";
+		set @question_set$,"^8A0808NOT SET^000000";
+		for ( set @b,0; @b <= getarraysize($survey_option$); set @b,@b+1 ) {
+		set $survey_option$[@b],"";}
+		while ( 1 ) {
+			set @subtract,2;
+			if ( getarraysize($survey_option$) > 1 ) && ($survey_title$ != "NOT SET") && ( $survey_question$ != "NOT SET") { 
+				set @menu_string$,"- Complete";
+				set @menu_string$,@menu_string$+":Title [^04B404"+$survey_title$+"^000000]";
+				set @subtract,3;
+			} else {
+				set @menu_string$,"Title [^04B404"+$survey_title$+"^000000]";
+				}
+			set @menu_string$,@menu_string$+":Question ["+@question_set$+"]";
+			for ( set @a,0; @a < getarraysize($survey_option$); set @a,@a+1 ) {
+				set @menu_string$,@menu_string$ +":    "+(@a+1)+". ^0404B4"+$survey_option$[@a]+"^000000";
+				}
+			set @menu_string$,@menu_string$ +":^0AE143+^000000 Add Option";
+			mes @np$;
+			mes "Do your Survey settings.";
+			next;
+			set @selected, select ( @menu_string$)-@subtract;
+				if ( @selected == -2 ) {
+					mes @np$;
+					mes "Title:"; 
+					mes "^04B404"+$survey_title$+"^000000";
+					mes "Question:";
+					mes "^04B404"+$survey_question$+"^000000";
+					mes "Options:";
+					for ( set @b,0; @b <= getarraysize($survey_option$)-1; set @b,@b+1 ) {
+					mes (@b+1)+". ^0404B4"+$survey_option$[@b]+"^000000";
+					}
+				next;
+				if (select( "- Not correct","- Correct" ) == 2 ) {
+					mes @np$;
+					mes "Your Survey started successfully";
+					set $vote_id,$vote_id+1;
+					set $survey_running,1;
+					getmapxy(@map$,@x,@y,1);
+					announce "Please see the Survey NPC in "+@map$+" and give us your Vote.",bc_all;
+					close;
+					}
+				}
+
+			if ( @selected == 0) { 
+			mes @np$;
+			mes "Type in the survey's leading question.";
+			mes "";
+			mes "Current:";
+			if ( $survey_question$ == "" ) {
+			mes "^8A0808NOT SET^000000";
+				} else {
+					mes "^04B404"+$survey_question$+"^000000"; }
+					next;
+					input $survey_question$;
+					set @question_set$,"^0AE143SET^000000";
+					}
+
+			if ( @selected == -1) { 
+				mes @np$;
+				mes "Type in the survey title.";
+				mes "";
+				mes "Current:";
+				mes "^04B404"+$survey_title$+"^000000";
+				next;
+				input $survey_title$;
+				}
+
+			if ( @selected == getarraysize($survey_option$)+1) { 
+			mes @np$;
+			mes "Type in a new option.";
+			next;
+			input $survey_option$[@selected-1];
+			set @selected,@selected+1;
+			}
+
+		if ( @selected >= 1 ) && ( @selected < getarraysize($survey_option$)+1) {
+
+		set @selected2, select ( "- Back","- Change","- Delete" );
+
+          if ( @selected2 == 2 ) {
+			mes @np$;
+			mes "Type in the new option:";
+			mes "";
+			mes "Current:";
+			mes "^0404B4"+$survey_option$[@selected-1]+"^000000";
+			next;
+			input $survey_option$[@selected-1];
+		}
+          if ( @selected2 == 3) {
+
+			for ( set @a,@selected-1; @a < getarraysize($survey_option$)-1; set @a,@a+1 ) {
+			set $survey_option$[@a],$survey_option$[@a+1];
+		}
+            set $survey_option$[@a],"";
+		}
+	}
+}
+
+end;
+// =========================
+// Gamemaster Settings-End
+// =========================
+} else {
+// =========================
+// Player's view
+// =========================
+	if ( !$survey_running ) { mes @np$; mes "There are no surveys running at the moment."; close; }
+	if ( !getd("##survey_id_"+$vote_id) ) {
+		mes @np$;
+		mes "Please choose an option for the following Survey:";
+		next;
+		while (1) {
+		mes "- ^8A0808"+$survey_title$+"^000000 -";
+		mes "";
+		mes $survey_question$;
+		set @menu_string$,"";
+		for ( set @a,0; @a < getarraysize($survey_option$); set @a,@a+1 ) {
+		set @menu_string$,@menu_string$ +":"+(@a+1)+". ^0404B4"+$survey_option$[@a]+"^000000";
+		}
+	next;
+	set @select, select ( @menu_string$ )-2;
+	mes @np$;
+	mes "Are you positive with your choice?";
+	mes "";
+	mes "- ^0404B4"+$survey_option$[@select]+"^000000 -";
+	next;
+	if ( select ( "- Nope","- Yeah" ) == 2 ) { 
+		set getd("##survey_id_"+($vote_id-1)),0;
+		set getd("##survey_id_"+$vote_id),1;
+		set $survey_option_votes[@select],$survey_option_votes[@select]+1;
+		mes @np$;
+		mes "Thank you for your Vote.";
+		next;
+		break;
+		}
+	}
+}
+	if ( getd("##survey_id_"+$vote_id) ) {
+		mes "- ^8A0808"+$survey_title$+"^000000 -";
+		mes $survey_question$;
+		mes "";
+		for ( set @a,0; @a < getarraysize($survey_option$); set @a,@a+1 ) {
+		mes "^0404B4"+$survey_option$[@a]+"^000000 - ^8A0808"+$survey_option_votes[@a]+"^000000 Vote/s";
+		}
+		close;
+		}
+	}
+}// Ending bracket
