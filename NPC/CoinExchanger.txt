@@ -1,9 +1,9 @@
-//===== Mysterious Script ====================================
+//============================================================
 //= Coin Exchanger
 //===== By: ==================================================
-//= Mysterious
+//= Mystery
 //===== Current Version: =====================================
-//= 1.9
+//= 2.0
 //===== Compatible With: =====================================
 //= Hercules, rAthena
 //===== Description: =========================================
@@ -13,19 +13,127 @@
 // The script is written to have a Soft Code and a Hard code
 // Soft code contains Currencies, Colours, etc.
 // Core code is the NPC itself.
-// Note: Must have knowledge in scripting if you wish to change
-// the code around
 //===== Additional Comments: =================================
-//= v1.0 - First release [Mysterious]
-//= v1.1 - Fixed a bug [Mysterious]
-//= v1.2 - Fixed Sentence structures [Mysterious]
-//= v1.3 - Fixed coins to change properly[Mysterious]
-//= v1.4 - Fixed a Typo [Mysterious]
-//= v1.5 - Fixed a bug where Zeny wasn't changing properly [Mysterious]
-//= v1.6 - Friendly Messages + New Structure [Mysterious]
-//= v1.7 - NPC checks coins + zeny before conversion [Mysterious]
-//= v1.8 - Added more Friendly Messages [Mysterious]
-//= v1.9 - Just changed a sentence structure [Mysterious]
+//= 1.0 - First release [Mystery]
+//= 1.1 - Fixed a bug [Mystery]
+//= 1.2 - Fixed Sentence structures [Mystery]
+//= 1.3 - Fixed coins to change properly[Mystery]
+//= 1.4 - Fixed a Typo [Mystery]
+//= 1.5 - Fixed a bug where Zeny wasn't changing properly [Mystery]
+//= 1.6 - Friendly Messages + New Structure [Mystery]
+//= 1.7 - NPC checks coins + zeny before conversion [Mystery]
+//= 1.8 - Added more Friendly Messages [Mystery]
+//= 1.9 - Just changed a sentence structure [Mystery]
+//= 2.0 - Hercules based (rAthena based lower portion of this file) [Mystery]
+//============================================================
+
+prontera,158,173,4	script	Coin Trader	4_F_KAFRA8,{
+	
+	// ----------------------
+	// - Core Code
+	// ----------------------
+	
+	cutin "kafra_08",2;
+	mes "[" + .colors$[1] + .npc_name$ + .colors$[0] + "]";
+	mes "What would you like to do today?";
+	set .@trade_type, select("- Coins -> Zeny:- Zeny -> Coins");
+	
+	mes "Very well. Here is the list on how much each coin is worth:";
+	for (set .@a, 0; .@a < getarraysize(.coin_id); set .@a, .@a + 1) {
+		mes .colors$[3 + .@a] + getitemname(.coin_id[.@a]) + .colors$[0] + ": " + .coin_to_zeny_format$[.@a] + "z";
+		set .@coin_menu$, .@coin_menu$ + (.@coin_menu$ == "" ? "" : ":") + .colors$[3 + .@a] + getitemname(.coin_id[.@a]) + .colors$[0];
+	}
+
+	mes "Tell me, what coin would you like to exchange?";
+	next;
+
+	set .@coin_choice, select(.@coin_menu$) - 1;
+	
+	next;
+	
+	mes "[" + .colors$[1] + .npc_name$ + .colors$[0] + "]";
+	
+	switch(.@trade_type) {
+		case 1: // Coins -> Zeny
+			mes "How much coins would you like to give up?";
+			input .@amount;
+			if (.@amount <= 0) { // Invalid Number?
+				mes .colors$[2] + "Please Input a number greater than 0:";
+				cutin "",255;
+				close;
+			} else if (countitem(.coin_id[.@coin_choice]) < .@amount) {
+				mes .colors$[2] + "I'm sorry, you do not have " + .@amount + " " + getitemname(.coin_id[.@coin_choice]) + (.@amount == 1 ? "" : "s");
+				cutin "",255;
+				close;
+			} else { // Ok! Checks Passed, Let's Trade!
+                                if(Zeny >= 1800000000) goto L_FullZeny; //Checks to see if the player has more than 1.8b
+				set Zeny,Zeny + (.coin_to_zeny[.@coin_choice] * .@amount);
+				delitem .coin_id[.@coin_choice],.@amount;
+				cutin "",255;
+				break;
+			}
+			
+		case 2: // Zeny -> Coins
+			mes "How much coins would you like?";
+			input .@amount;
+			if (.@amount <= 0) { // Invalid Number?
+				mes .colors$[2] + "Please Input a number greater than 0:";
+				cutin "",255;
+				close;
+			} else if (!checkweight(.coin_id[.@coin_choice],.@amount)) { // Will it make the character overweight?
+				mes .colors$[2] + "I'm Sorry, but you can't carry this due to weight restrictions";
+				cutin "",255;
+				close;
+			} else if (Zeny < .coin_to_zeny[.@coin_choice] * .@amount) {
+				mes .colors$[2] + "I'm sorry, you do not have enough zeny...";
+				cutin "",255;
+				close;
+			} else { // Checks OK! Let's trade!
+				set Zeny, Zeny - (.coin_to_zeny[.@coin_choice] * .@amount);
+				getitem .coin_id[.@coin_choice], .@amount;				
+				cutin "",255;
+			}
+		}
+		mes "[" + .colors$[1] + .npc_name$ + .colors$[0] + "]";
+		mes "Pleasure doing business with you.";
+		close2;
+		cutin "", 255;
+		close;
+
+
+		L_FullZeny:
+                        next;
+                        mes "[" + .colors$[1] + .npc_name$ + .colors$[0] + "]";
+                        mes "I'm sorry, but I can't allow you to exchange Coins into Zeny when you have over 1.8b zeny.";
+                        close;
+
+			// ----------------------
+			// - Soft Code / Configurations
+			// ----------------------	
+			
+                  OnInit:
+			// Store NPC Name
+			set .npc_name$, "Coin Master";
+			
+			// Storing Colours
+			// Order of Array: Default Text, NPC Name, Error, coin_type1, coin_type2, coin_type3, coin_type4, etc...
+			// Note: If you plan on adding additional coins, simply add a new color here
+			setarray .colors$[0],"^000000", "^336699", "^550000", "^996633", "^666666", "^FFFF66", "^99CCCC";
+			
+			// Set Coin Item ID's
+			// In Order coin_id1, coin_id2, coin_id3, coin_id4, etc...
+			setarray .coin_id[0],673, 675, 671, 674;
+			
+			// Coin -> Zeny Value
+                        // Change the Value you want the coins to be worth | Order: Bronze Coin, Gold Coin, Platinum Coin, Mithril Coin
+			setarray .coin_to_zeny[0],1000000,10000000,25000000,200000000;
+			
+			// Currency Formatted String of Zeny | Order: Bronze Coin, Gold Coin, Platinum Coin, Mithril Coin
+			setarray .coin_to_zeny_format$[0],"1,000,000","10,000,000","25,000,000","200,000,000";
+}
+
+//============================================================
+//= rAthena Version
 //============================================================
 
 prontera,158,173,4	script	Coin Trader	860,{
@@ -81,7 +189,7 @@ prontera,158,173,4	script	Coin Trader	860,{
 				mes .colors$[2] + "Please Input a number greater than 0:";
 				cutin "",255;
 				close;
-			} else if (!checkweight(.coin_id[.@coin_choice],.@amount)) { // Will it Make Char Overweight?
+			} else if (!checkweight(.coin_id[.@coin_choice],.@amount)) { // Will it make the character overweight?
 				mes .colors$[2] + "I'm Sorry, but you can't carry this due to weight restrictions";
 				cutin "",255;
 				close;
