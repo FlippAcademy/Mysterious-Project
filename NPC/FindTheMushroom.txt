@@ -1,76 +1,61 @@
-//===== Mysterious Script ====================================
-//= Find the Mushroom (Automatic)
+//===== Hercules Script ======================================
+//= Find the Mushroom
 //===== By: ==================================================
-//= Mysterious
+//= Mystery
 //===== Current Version: =====================================
-//= 3.3
-//===== Compatible With: =====================================
-//= Hercules, rAthena
+//= 4.0
 //===== Description: =========================================
 //= Find the Mushroom - random amount of Mushrooms spawns in random maps.
 //= Players need to find these mushrooms and kill them to gain prizes!
 //===== Additional Comments: =================================
-//= 3.0 | Fully Functional with Rewritten script [Mysterious]
-//= 3.1 | Added more Friendly messages [Mysterious]
-//= 3.2 | Fixed a Typo :< [Mysterious]
-//= 3.3 | Made it clear that this script is Automatic and the other is Manual [Mysterious]
-//============================================================ 
-xxxx,xxx,xxx,x	script	Find the Mushroom	1084,{
-if((.Status ) == 0) {
-	
-	mes "[ Find The Mushroom ]";
-	mes "There is no event at the moment!";
-} else {
-	mes "There are "+.Mushroom+"s left in "+.Map$+" now!";
-	mes "Find and Kill the mushrooms to gain <Prize>!";
-}
-close;
+//= 3.0 Fully Functional with Rewritten script. [Mystery]
+//= 3.6a Slightly edited. [Euphy]
+//= 4.0 Edited so that it's up to date current to Hercules. [Mystery]
+//============================================================
 
-OnMinute10:
-	set .Spawn,rand(1,10); //How much Mushrooms should we spawn?
-	set $@ran, rand(1,4); //Which map should we spawn Mushrooms in?
-	if ($@ran == 4) set .Map$,"izlude";
-	if ($@ran == 3) set .Map$,"geffen";
-	if ($@ran == 2) set .Map$,"morocc";
-	if ($@ran == 1) set .Map$,"prontera";
+prontera,142,228,6	script	Find the Mushroom	BLACK_MUSHROOM,{
+	mes "[ Find The Mushroom ]";
+	if (!.status)
+		mes "There is no event at the moment!";
+	else {
+		mes "There are "+.Spawn+" Mushrooms left in "+.Map$+"!";
+		mes "Find and kill the mushrooms to gain "+getitemname(.Prize)+"!";
+	}
+	if (.status || getgmlevel() < .GM) close;
+	mes "Start the event?";
+	next;
+	if(select("- No:- Yes") == 1) close;
+	donpcevent strnpcinfo(0)+"::OnMinute10";
+	mes "[ Find The Mushroom ]";
+	mes "Event started!";
+	close;
+
+OnInit:
+	set .Prize,512;	// Reward item ID
+	set .Amount,10;	// Reward item amount
+	set .GM,60;	// GM level required to access NPC
+	setarray .maps$[0],"izlude","geffen","morocc","prontera"; // Possible maps
+	end;
+
+OnMinute10:	// Start time (every hour)
+	if (.status) end;
+	set .status,1;
+	set .Spawn,rand(1,10);	// How many Mushrooms should spawn?
+	set .Map$,.maps$[rand(getarraysize(.maps$))];
 	killmonster .Map$,"All";
 	monster .Map$,0,0,"Please don't kill me!",1084,.Spawn,strnpcinfo(0)+"::OnMobKilled";
-	announce "Find the Mushroom : Total of "+.Spawn+" Mushrooms have been Spawned in "+.Map$+"!",0;
-	sleep2 10000;
-	announce "Find the Mushroom : Every single Mushroom you kill will give you <Prize>!",0;
-	sleep2 10000;
+	announce "Find the Mushroom : Total of "+.Spawn+" Mushrooms have been spawned in "+.Map$+"!",0;
+	sleep 2500;
+	announce "Find the Mushroom : Every Mushroom you kill will give you "+getitemname(.Prize)+"!",0;
 	end;
 
 OnMobKilled:
-	set .Spawn,.Spawn - 1;
-	getitem ID,AMOUNT; //Add the ItemID and Amount you wish to give as a prize. To add more prizes, just add more getitem ID,AMOUNT;
-	if( .Spawn ) announce "[ "+strcharinfo(0)+" ] has killed 1 Mushroom. There are now "+.Spawn+" Mushroom(s) left.",bc_map;
+	set .Spawn, .Spawn - 1;
+	getitem .Prize, .Amount;
+	if (.Spawn) announce "[ "+strcharinfo(0)+" ] has killed a Mushroom. There are now "+.Spawn+" Mushroom(s) left.",bc_map;
 	else {
-		announce "Find the Mushroom Event has ended. All the Mushrooms have been Killed.",0;
-		set .Status,0;
+		announce "The Find the Mushroom Event has ended. All the Mushrooms have been killed.",0;
+		set .status,0;
 	}
 	end;
 }
-
-//===== Older Comments: =====================================
-//= 1.0 | First release [Mysterious]
-//= 1.1 | Players when clicked on NPC, it will show them if the event is currently on, the map it is on, and the Prize that is given [Mysterious]
-//= 1.2 | Added an Stop and Start function [Mysterious]
-//= 1.3 | GMs can now Start or Stop the event [Mysterious]
-//= 1.4 | There is still the OnMinute timer [Mysterious]
-//= 1.5 | Kept old Input Item ID format -> Now removed the Input Map Format [Mysterious]
-//= 1.6 | Added a random loop for maps [Mysterious]
-//= 1.7 | Changed the Start Event layout [Mysterious]
-//= 1.8 | Mushroom will spawn in a  map picked by the npc [Mysterious]
-//= 1.9 | Added random amount of Mushroms Spawned [Mysterious]
-//= 2.0 | Added a map announce for the winner, instead of global announce [Mysterious]
-//= 2.1 | Rewritten format [Mysterious]
-//= 2.2 | Added description of array in certain areas [Mysterious]
-//= 2.3 | Fixed Typos [Mysterious]
-//= 2.4 | Rearranged certain Areas [Mysterious]
-//= 2.5 | Fixed certain map server errors spit outs [Mysterious]
-//= 2.6 | Adjusted and made brackets more friendly [Mysterious]
-//= 2.7 | Fixed item drop issue [Mysterious]
-//= 2.8 | Fixed event status checked [Mysterious]
-//= 2.9 | Fixed Credits, Description, Notes [Mysterious]
-//===========================================================
