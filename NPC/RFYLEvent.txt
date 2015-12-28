@@ -1,26 +1,27 @@
-//===== Mysterious Script ====================================
+//============================================================
 //= Run for Your Life
 //===== By: ==================================================
 //= Mysterious
 //===== Current Version: =====================================
-//= 2.8
+//= 3.0
 //===== Compatible With: =====================================
-//= Hercules, rAthena
+//= Hercules
 //===== Description: =========================================
 //= A Run for your Life event (Based for Novices)
 //===== TODO: ================================================
 // - Change more coding
 //===== Additional Comments: =================================
-//= v1.0 - First release [Mysterious]
-//= v2.0 - Overhaul of Entire Script [Mysterious]
-//= v2.1 - Fixed Sentence structures [Mysterious]
-//= v2.2 - Fixed a Typo and made it obvious what players had to change [Mysterious]
-//= v2.3 - Removed unnecessary 'next;' thanks to soUPas [Mysterious]
-//= v2.4 - Fixed an issue where the prize giver was showing up when not supposed to [Mysterious]
-//= v2.5 - Added Friendly Messages [Mysterious]
-//= v2.6 - Removed duplicated OnInIt labels [Mysterious]
-//= v2.7 - Cleaning and organizing [Mysterious]
-//= v2.8 - Optimized a little better [Mysterious]
+//= 1.0 - First release [Mystery]
+//= 2.0 - Overhaul of Entire Script [Mystery]
+//= 2.1 - Fixed Sentence structures [Mystery]
+//= 2.2 - Fixed a Typo and made it obvious what players had to change [Mystery]
+//= 2.3 - Removed unnecessary 'next;' thanks to soUPas [Mystery]
+//= 2.4 - Fixed an issue where the prize giver was showing up when not supposed to [Mystery]
+//= 2.5 - Added Friendly Messages [Mystery]
+//= 2.6 - Removed duplicated OnInIt labels [Mystery]
+//= 2.7 - Cleaning and organizing [Mystery]
+//= 2.8 - Optimized a little better [Mystery]
+//= 3.0 - Fixed any case warnings / clean up [Mystery]
 //============================================================ 
 
 -	script	RFYL#disable	-1,{
@@ -34,7 +35,7 @@ xxx,xxx,xxx,xxx	script	Zombie Minion	1015,{
 
 if (getgmlevel() >= 40) goto LMS_Admin;
 	mes "[Minion]";
-	if (!.Status)
+	if (!.status)
 		mes "My master seems to be slacking..";
 	else {
 		mes "My master is currently busy! He has an invasion scheduled!";
@@ -43,7 +44,7 @@ if (getgmlevel() >= 40) goto LMS_Admin;
 
 LMS_Admin:
 	next;
-	if (!.Status)
+	if (!.status)
 		mes "[Minion]";
 		mes "My master has no invasion planned at the moment. Do you wish to schedule an invasion?";
 		menu "- Start Event",M_RFYL,"- Spectate",M_warp,"- End Event",M_EndEvent,"- No Thanks",M_Leave;
@@ -78,7 +79,7 @@ LMS_Admin:
 		mes "[Minion]";
 		mes "Ok master, I will stop the event for you right away!";
 		next;
-		set .Status,0;
+		set .status,0;
 		disablenpc "Zombie Master";
 		disablenpc "Present#RFYL";
 		killmonsterall "quiz_01";
@@ -92,7 +93,7 @@ LMS_Admin:
 // =========================
 StartEvent: //Announcement to notify all players
 // =========================
-	set .Status,1;
+	set .status,1;
 	announce "Zombie Vs. Novice event Will begin in 3 minutes. Head East/North",0;
 	killmonsterall "quiz_01";
 	sleep 55000;
@@ -248,7 +249,7 @@ quiz_01,42,378,3	script	Present#RFYL	72,{
 	getitem 674, 3; // Change This item id to what ever you want
 	warp "rachel",120,135;
 	disablenpc "Present#RFYL";
-	set .Status,0;
+	set .status,0;
 	end;
 }
 
