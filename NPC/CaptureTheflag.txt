@@ -25,23 +25,18 @@
 prt_are01	mapflag	pvp
 prt_are01	mapflag	nomemo
 prt_are01	mapflag	noreturn
-prt_are01	mapflag	restricted	5
 pvp_2vs2	mapflag	gvg
 pvp_2vs2	mapflag	nomemo
 pvp_2vs2	mapflag	noreturn
-pvp_2vs2	mapflag	restricted	5
 tha_t10	mapflag	pvp
 tha_t10	mapflag	nomemo
 tha_t10	mapflag	noreturn
-tha_t10	mapflag	restricted	5
 poring_w02	mapflag	gvg
 poring_w02	mapflag	nomemo
 poring_w02	mapflag	noreturn
-poring_w02	mapflag	restricted	5
 pvp_y_7-1	mapflag	pvp
 pvp_y_7-1	mapflag	nomemo
 pvp_y_7-1	mapflag	noreturn
-pvp_y_7-1	mapflag	restricted	5
 
 prontera,161,193,6	script	Capture The Flag::CTF	108,{
 
@@ -94,19 +89,16 @@ if ($@redwin == 1 || $@bluewin == 1)
   }
 
 // If the map is full, no more players are allowed in.
-if (@mapuser >= 24)
-  {
-    goto fullmsgclassic;
-  }
-
-if ($@redqt < 0)
-{
-set $@redqt, 0;
+if (@mapuser >= 24) {
+	goto fullmsgclassic;
 }
 
-if ($@blueqt < 0)
-{
-set $@blueqt, 0;
+if ($@redqt < 0) {
+	set $@redqt, 0;
+}
+
+if ($@blueqt < 0) {
+	set $@blueqt, 0;
 }
 
 mes "The "+@redteam$+" has "+$@redqt+"/12 Players.";
@@ -156,15 +148,13 @@ set colorchange, 1;
 set @playing, 1;
 set @classic, 1;
 
-if (@team == 2)
-{
+if (@team == 2) {
 set $@redqt, $@redqt +1;
 
 // ======= Red Team ====== \\
 */ Remove this and on line 311 if you want to enable
 // Changes the player's dyes, warps the player, and saves the player to CTF map
-if (Sex == 1)
-  {
+if (Sex == 1) {
   if (Class == Job_Thief || Class == Job_Monk || Class == Job_Acolyte || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest || Class == Job_Knight || Class == Job_High_Wizard)
 		{
   	setlook 6,6;
@@ -238,8 +228,7 @@ if (Sex == 1)
 		}
 	}
 
-if (Sex == 0)
-	{
+if (Sex == 0) {
 	if (Class == Novice ||  Class == Job_Thief || Class == Job_Acolyte || Class == Job_SuperNovice || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Assassin_Cross || Class == Job_Priest)
 		{
 		setlook 6,6;
@@ -252,49 +241,41 @@ if (Sex == 0)
 		setlook 7,18;
 		}
 
-	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman)
-  	{
+	if (Class == Job_Monk || Class == Job_Knight || Class == Job_Lord_Knight || Class == Job_Whitesmith || Class == Job_Hunter || Class == Job_Sniper || Class == Job_Soul_Linker || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Mage || Class == Job_Swordsman) {
 		setlook 6,6;
 		setlook 7,42;
 		}
 
-	if (Class == Job_High_Priest)
-		{
+	if (Class == Job_High_Priest) {
 		setlook 6,6;
 		setlook 7,0;
 		}
 
-  if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor)
-		{
-  	setlook 6,6;
-  	setlook 7,14;
-  	}
-
-	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard)
-		{
+	if (Class == Job_Champion || Class == Job_Creator || Class == Job_Sage || Class == Job_Professor) {
 		setlook 6,6;
-  	setlook 7,66;
+		setlook 7,14;
   	}
 
-	if (Class == Job_Paladin || Class == Job_Blacksmith)
-		{
+	if (Class == Job_Alchem || Class == Job_Wizard || Class == Job_High_Wizard) {
+		setlook 6,6;
+		setlook 7,66;
+  	}
+
+	if (Class == Job_Paladin || Class == Job_Blacksmith) {
 		setlook 6,6;
 		setlook 7,58;
   	}
-  if (Class == Job_Dancer)
-  	{
+  if (Class == Job_Dancer) {
   	setlook 6,6;
   	setlook 7,153;
   	}
 
-	if (Class == Job_Gypsy)
-  	{
+	if (Class == Job_Gypsy) {
   	setlook 6,6;
 		setlook 7,47;
   	}
 
-  if (Class == Job_Stalker)
-		{
+  if (Class == Job_Stalker) {
   	setlook 6,6;
   	setlook 7,157;
   	}
