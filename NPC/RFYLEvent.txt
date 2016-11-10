@@ -1,11 +1,12 @@
 //============================================================
-//= Run for Your Life
-//===== By: ==================================================
-//= Mysterious
+//= Run for Your Life | Mystery
+//============================================================
 //===== Current Version: =====================================
 //= 3.0
 //===== Compatible With: =====================================
-//= Hercules
+//= rAthena & Hercules
+// *Please note that you will need to make adjustments to this
+// script if you want it to work properly with Hercules.
 //===== Description: =========================================
 //= A Run for your Life event (Based for Novices)
 //===== TODO: ================================================
